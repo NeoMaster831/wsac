@@ -1,0 +1,13 @@
+namespace WsACService;
+
+public static class Config {
+    public const ulong PayloadSignature = @PAYLOAD_SIGNATURE@;
+    public const ulong IsDebuggerPresentId = @IS_DEBUGGER_PRESENT_ID@;
+    public const ulong RemoteDebuggerPresentId = @REMOTE_DEBUGGER_PRESENT_ID@;
+    public const ulong NtQueryId = @NTQUERY_ID@;
+    public const ulong EbsId = @EBS_ID@;
+    public const ulong RtlQueryHeapId = @RTL_QUERY_HEAP_ID@;
+    public const ulong ManualCheckHeapProtection = @MANUAL_CHECK_HEAP_PROTECTION@;
+    public const ulong CheckKUserSharedUser = @CHECK_KUSER_SHARED_USER@;
+    public const ulong PeacefulExit = @PEACEFUL_EXIT@;
+}

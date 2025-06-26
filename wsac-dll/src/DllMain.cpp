@@ -1,5 +1,4 @@
 #include "Include.hpp"
-#include "Log.hpp"
 #include "Run/Comm.hpp"
 #include "Run/UserLocal.hpp"
 
@@ -10,6 +9,11 @@ static run::UserLocalSession uls;
 
 bool Enable()
 {
+    if (!run::comm::Initialize())
+    {
+        return false;
+    }
+
     uls.Start();
     return true;
 }
@@ -17,6 +21,7 @@ bool Enable()
 void Disable()
 {
     uls.Stop();
+    run::comm::Terminate();
 }
 } // namespace wsac
 

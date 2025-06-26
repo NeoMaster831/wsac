@@ -1,14 +1,19 @@
 #include "Run/UserLocal.hpp"
+
+#include "Comm.hpp"
 #include "Log.hpp"
-#include "Run/Detector.hpp"
 
 void wsac::run::UserLocalSession::Check()
 {
-    for (const auto dv = Detector::GetDetectors(); const auto *d : dv)
+    std::vector<uint8_t> body;
+    for (const auto *d : cfp::Register::All())
     {
-        if (d->Check())
+        auto status = (*d)(body);
+
+        // TODO : replace request id
+        if (const bool result = comm::ReportBuilder().Header({0, d->getId(), status}).Body(body).Send(); !result)
         {
-            LogLn("Rule %zu : %s", d->Id, d->Description.c_str());
+            LogLn("Couldn't send ID: %zu", d->getId());
         }
     }
 }
@@ -37,6 +42,9 @@ void wsac::run::UserLocalSession::Loop() const
     while (running)
     {
         Check();
-        std::this_thread::sleep_for(std::chrono::seconds(10));
+
+        // TODO: Fix
+        for (auto i = 0; i < 10 && running; ++i)
+            std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 }

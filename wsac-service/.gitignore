@@ -1,0 +1,4 @@
+bin/
+obj/
+Config.cs
+*.user

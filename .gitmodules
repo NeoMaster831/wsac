@@ -1,3 +1,6 @@
 [submodule "sub/phnt"]
 	path = sub/phnt
 	url = https://github.com/winsiderss/phnt
+[submodule "sub/cfproxy"]
+	path = sub/cfproxy
+	url = https://github.com/Sharp0802/cfproxy.git

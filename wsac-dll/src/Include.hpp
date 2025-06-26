@@ -9,3 +9,7 @@
 #include <functional>
 #include <thread>
 #include <vector>
+
+#include <cfp/Register.h>
+
+#include "Config.hpp"

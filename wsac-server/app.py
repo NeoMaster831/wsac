@@ -1,3 +1,4 @@
+from config import PAYLOAD_SIGNATURE
 from flask import Flask
 
 app = Flask(__name__)

@@ -11,10 +11,12 @@ int main() {
     }
 
     using pEnableAc = BOOLEAN(*)();
+    using pDisableAc = void(*)();
     const auto enableAc = reinterpret_cast<pEnableAc>(GetProcAddress(wsac, "Enable"));
+    const auto disableAc = reinterpret_cast<pDisableAc>(GetProcAddress(wsac, "Disable"));
 
-    if (!enableAc) {
-        std::cout << "Couldn't get Enable export!" << '\n';
+    if (!enableAc || !disableAc) {
+        std::cout << "Couldn't get module export!" << '\n';
         return 1;
     }
 
@@ -23,7 +25,6 @@ int main() {
         return 1;
     }
 
-
     while (true) {
         int idle = 1;
         std::cin >> idle;
@@ -31,6 +32,8 @@ int main() {
             break;
         }
     }
+
+    disableAc();
 
     return 0;
 }

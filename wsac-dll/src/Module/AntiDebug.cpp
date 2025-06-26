@@ -1,24 +1,25 @@
 #include "Module/AntiDebug.hpp"
 #include "Log.hpp"
-#include "Run/Detector.hpp"
 
-bool wsac::mod::antidebug::IsDebuggerPresent() noexcept
+cfp::Result<wsac::mod::antidebug::Empty> wsac::mod::antidebug::IsDebuggerPresent() noexcept
 {
-    return ::IsDebuggerPresent();
+    auto status = ::IsDebuggerPresent() ? AD_BAD : AD_OKAY;
+    return {status, std::nullopt};
 }
 
-bool wsac::mod::antidebug::CheckRemoteDebuggerPresent() noexcept
+cfp::Result<wsac::mod::antidebug::Empty> wsac::mod::antidebug::CheckRemoteDebuggerPresent() noexcept
 {
     BOOL result = FALSE;
     if (!::CheckRemoteDebuggerPresent(GetCurrentProcess(), &result))
     {
         LogLn("CheckRemoteDebuggerPresent returned FALSE! Ignoring...");
-        return false;
+        return {AD_OKAY, std::nullopt};
     }
-    return result == TRUE;
+
+    return {result ? AD_BAD : AD_OKAY, std::nullopt};
 }
 
-bool wsac::mod::antidebug::CheckNtQuery() noexcept
+cfp::Result<wsac::mod::antidebug::Empty> wsac::mod::antidebug::CheckNtQuery() noexcept
 {
 
     ULONG retLen = 0;
@@ -35,7 +36,7 @@ bool wsac::mod::antidebug::CheckNtQuery() noexcept
     else if (hDbgObj != nullptr)
     {
         LogLn("ProcessDebugPort check failed");
-        return true;
+        return {AD_BAD, std::nullopt};
     }
 
     const NTSTATUS debugObjectStatus =
@@ -45,14 +46,14 @@ bool wsac::mod::antidebug::CheckNtQuery() noexcept
         if (debugObjectStatus != STATUS_PORT_NOT_SET)
         {
             LogLn("DebugObjectStatus code check failed");
-            return true;
+            return {AD_BAD, std::nullopt};
         }
     }
     // ProcessDebugObjectHandle should be NULL.
     else if (hDbgObj != nullptr)
     {
         LogLn("ProcessDebugObjectHandle not null");
-        return true;
+        return {AD_BAD, std::nullopt};
     }
 
     ULONG flags = 0;
@@ -65,14 +66,14 @@ bool wsac::mod::antidebug::CheckNtQuery() noexcept
     else if (flags != 1)
     {
         LogLn("ProcessDebugFlags not 1");
-        return true;
+        return {AD_BAD, std::nullopt};
     }
 
     // Now all tests passed.
-    return false;
+    return {AD_OKAY, std::nullopt};
 }
 
-bool wsac::mod::antidebug::CheckEbs() noexcept
+cfp::Result<wsac::mod::antidebug::Empty> wsac::mod::antidebug::CheckEbs() noexcept
 {
 
     const auto peb = NtCurrentPeb();
@@ -80,26 +81,26 @@ bool wsac::mod::antidebug::CheckEbs() noexcept
     if (peb->BeingDebugged)
     {
         LogLn("BeingDebugged is true");
-        return true;
+        return {AD_BAD, std::nullopt};
     }
 
     if (peb->NtGlobalFlag & (FLG_HEAP_ENABLE_TAIL_CHECK | FLG_HEAP_ENABLE_FREE_CHECK | FLG_HEAP_VALIDATE_PARAMETERS))
     {
         LogLn("NtGlobalFlag check failed");
-        return true;
+        return {AD_BAD, std::nullopt};
     }
 
-    return false;
+    return {AD_OKAY, std::nullopt};
 }
 
-bool wsac::mod::antidebug::RtlQueryProcessDebugInformation() noexcept
+cfp::Result<wsac::mod::antidebug::Empty> wsac::mod::antidebug::RtlQueryProcessDebugInformation() noexcept
 {
 
     const auto buf = RtlCreateQueryDebugBuffer(0, FALSE);
     if (!buf)
     {
         LogLn("RtlCreateQueryDebugBuffer returned NULL, ignoring...");
-        return false;
+        return {AD_OKAY, std::nullopt};
     }
 
     if (!NT_SUCCESS(
@@ -107,19 +108,19 @@ bool wsac::mod::antidebug::RtlQueryProcessDebugInformation() noexcept
                                               RTL_QUERY_PROCESS_HEAP_SUMMARY | RTL_QUERY_PROCESS_HEAP_ENTRIES, buf)))
     {
         LogLn("RtlQueryProcessDebugInformation returned fail status, ignoring...");
-        return false;
+        return {AD_OKAY, std::nullopt};
     }
 
     if (const ULONG check = static_cast<PRTL_PROCESS_HEAPS_V2>(buf->Heaps)->Heaps[0].Flags; check & ~HEAP_GROWABLE)
     {
         LogLn("Heap check failed");
-        return true;
+        return {AD_BAD, std::nullopt};
     }
 
-    return false;
+    return {AD_OKAY, std::nullopt};
 }
 
-bool wsac::mod::antidebug::CheckHeapProtection() noexcept
+cfp::Result<wsac::mod::antidebug::Empty> wsac::mod::antidebug::CheckHeapProtection() noexcept
 {
 
     PROCESS_HEAP_ENTRY entry = {};
@@ -128,7 +129,7 @@ bool wsac::mod::antidebug::CheckHeapProtection() noexcept
         if (!HeapWalk(GetProcessHeap(), &entry))
         {
             LogLn("HeapWalk failed, ignoring...");
-            return false;
+            return {AD_OKAY, std::nullopt};
         }
     } while (entry.wFlags != PROCESS_HEAP_ENTRY_BUSY);
 
@@ -136,30 +137,30 @@ bool wsac::mod::antidebug::CheckHeapProtection() noexcept
         *static_cast<PDWORD>(overlapped) == 0xABABABAB)
     {
         LogLn("HeapProtection failed");
-        return true;
+        return {AD_BAD, std::nullopt};
     }
 
-    return false;
+    return {AD_OKAY, std::nullopt};
 }
 
-bool wsac::mod::antidebug::CheckKuserSharedData() noexcept
+cfp::Result<wsac::mod::antidebug::Empty> wsac::mod::antidebug::CheckKuserSharedData() noexcept
 {
     if (const auto sharedData = USER_SHARED_DATA; sharedData->KdDebuggerEnabled & 0x3)
     {
         LogLn("Kd Debugger Enabled!!!");
-        return true;
+        return {AD_BAD, std::nullopt};
     }
 
-    return false;
+    return {AD_OKAY, std::nullopt};
 }
 
 namespace wsac::mod::antidebug
 {
-DECL_DETECTOR(IsDebuggerPresent, "IsDebuggerPresent");
-DECL_DETECTOR(CheckRemoteDebuggerPresent, "CheckRemoteDebuggerPresent");
-DECL_DETECTOR(CheckNtQuery, "CheckNtQuery");
-DECL_DETECTOR(CheckEbs, "CheckEbs");
-DECL_DETECTOR(RtlQueryProcessDebugInformation, "RtlQueryProcessDebugInformation");
-DECL_DETECTOR(CheckHeapProtection, "CheckHeapProtection");
-DECL_DETECTOR(CheckKuserSharedData, "KUserSharedData");
+CFP_REG(IS_DEBUGGER_PRESENT_ID, IsDebuggerPresent, "IsDebuggerPresent");
+CFP_REG(REMOTE_DEBUGGER_PRESENT_ID, CheckRemoteDebuggerPresent, "CheckRemoteDebuggerPresent");
+CFP_REG(NTQUERY_ID, CheckNtQuery, "CheckNtQuery");
+CFP_REG(EBS_ID, CheckEbs, "CheckEbs");
+CFP_REG(RTL_QUERY_HEAP_ID, RtlQueryProcessDebugInformation, "RtlQueryProcessDebugInformation");
+CFP_REG(MANUAL_CHECK_HEAP_PROTECTION, CheckHeapProtection, "CheckHeapProtection");
+CFP_REG(CHECK_KUSER_SHARED_USER, CheckKuserSharedData, "KUserSharedData");
 } // namespace wsac::mod::antidebug
