@@ -1,4 +1,4 @@
-﻿namespace WsACService;
+﻿namespace WsACService.Net;
 
 public sealed class PipeManager
 {

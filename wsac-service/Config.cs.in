@@ -9,5 +9,6 @@ public static class Config {
     public const ulong RtlQueryHeapId = @RTL_QUERY_HEAP_ID@;
     public const ulong ManualCheckHeapProtection = @MANUAL_CHECK_HEAP_PROTECTION@;
     public const ulong CheckKUserSharedUser = @CHECK_KUSER_SHARED_USER@;
-    public const ulong PeacefulExit = @PEACEFUL_EXIT@;
+    public const ulong RecoverRequest = @RECOVER_REQUEST@;
+    public const uint StopMagicByte = @STOP_MAGIC_BYTE@;
 }

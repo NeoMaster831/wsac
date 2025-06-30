@@ -147,7 +147,7 @@ cfp::Result<wsac::mod::antidebug::Empty> wsac::mod::antidebug::CheckKuserSharedD
 {
     if (const auto sharedData = USER_SHARED_DATA; sharedData->KdDebuggerEnabled & 0x3)
     {
-        LogLn("Kd Debugger Enabled!!!");
+        LogLn("Kd Debugger Enabled");
         return {AD_BAD, std::nullopt};
     }
 

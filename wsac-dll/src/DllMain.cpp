@@ -1,37 +1,43 @@
+#include "Host.hpp"
 #include "Include.hpp"
-#include "Run/Comm.hpp"
-#include "Run/UserLocal.hpp"
+#include "Log.hpp"
+#include "Net/Comm.hpp"
+#include "Run/Selector.hpp"
+#include "Run/State.hpp"
+#include "Sec/CryptoService.hpp"
 
 namespace wsac
 {
 
-static run::UserLocalSession uls;
+static Host host;
 
-bool Enable()
+void Enable()
 {
-    if (!run::comm::Initialize())
-    {
-        return false;
-    }
-
-    uls.Start();
-    return true;
+    host.Add<run::State>();
+    host.Add<net::CommService>();
+    host.Add<sec::CryptoService>();
+    host.Add<run::Selector>();
 }
 
 void Disable()
 {
-    uls.Stop();
-    run::comm::Terminate();
+    // dispose twice is intended
+    host.~Host();
 }
 } // namespace wsac
 
 extern "C" __declspec(dllexport) BOOLEAN Enable()
 {
-    if (wsac::Enable())
+    try
     {
+        wsac::Enable();
         return TRUE;
     }
-    return FALSE;
+    catch (std::exception& e)
+    {
+        LogLn("%s", e.what());
+        return FALSE;
+    }
 }
 
 extern "C" __declspec(dllexport) void Disable()

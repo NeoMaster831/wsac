@@ -1,4 +1,4 @@
-﻿namespace WsACService;
+﻿namespace WsACService.Net;
 
 public sealed class PipeWorker(ILogger<PipeManager> logger, PipeManager manager) : IHostedService
 {
