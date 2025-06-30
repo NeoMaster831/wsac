@@ -11,4 +11,6 @@ public static class Config {
     public const ulong CheckKUserSharedUser = @CHECK_KUSER_SHARED_USER@;
     public const ulong RecoverRequest = @RECOVER_REQUEST@;
     public const uint StopMagicByte = @STOP_MAGIC_BYTE@;
+
+    public const byte[] PSK = @PSK@;
 }
