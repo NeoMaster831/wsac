@@ -1,9 +1,9 @@
 using System.IO.Pipes;
-using WsACService.InterProcess.Abstractions;
+using WsACService.Layers.InterProcess.Abstractions;
 using WsACService.Memory;
 using WsACService.Net;
 
-namespace WsACService.InterProcess.Pipe;
+namespace WsACService.Layers.InterProcess.Pipe;
 
 public class PipeLowLevelReader(PipeStream pipe) : ILowLevelReader
 {

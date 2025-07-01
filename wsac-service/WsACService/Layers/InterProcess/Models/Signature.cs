@@ -1,4 +1,4 @@
-namespace WsACService.InterProcess.Models;
+namespace WsACService.Layers.InterProcess.Models;
 
 public enum Signature : ushort
 {

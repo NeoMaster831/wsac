@@ -1,6 +1,6 @@
 using WsACService.Memory;
 
-namespace WsACService.InterProcess.Models;
+namespace WsACService.Layers.InterProcess.Models;
 
 public readonly struct Frame
 {
