@@ -1,8 +1,7 @@
 using WsACService.InterProcess.Abstractions;
 using WsACService.InterProcess.Models;
-using WsACService.Logging;
 
-namespace WsACService.InterProcess;
+namespace WsACService.InterProcess.Handlers;
 
 [FrameHandler]
 public class ResetHandler : IFrameHandler
