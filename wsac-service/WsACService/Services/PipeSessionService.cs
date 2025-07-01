@@ -38,7 +38,7 @@ public sealed class PipeSessionService : IHostedService, IDisposable
             pipe.WaitForConnection();
             
             var id = Interlocked.Increment(ref _sessionId);
-            var task = new Session(id, _logger, writer, reader).RunAsync(ct);
+            var task = new FrameSession(id, _logger, writer, reader).RunAsync(ct);
             
             task.GetAwaiter().GetResult();
         }

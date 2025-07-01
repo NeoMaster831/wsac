@@ -1,8 +1,8 @@
 using System.IO.Pipes;
-using WsACService.Layers.InterProcess.Abstractions;
+using WsACService.InterProcess.Abstractions;
 using WsACService.Memory;
 
-namespace WsACService.Layers.InterProcess.Pipe;
+namespace WsACService.InterProcess.Pipe;
 
 public class PipeLowLevelWriter(PipeStream pipe) : ILowLevelWriter
 {

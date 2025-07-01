@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
-namespace WsACService.Layers.InterProcess.Models;
+namespace WsACService.InterProcess.Models;
 
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
 public struct FrameHeader

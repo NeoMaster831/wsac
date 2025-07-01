@@ -1,8 +1,8 @@
 using System.Diagnostics;
-using WsACService.Layers.InterProcess.Abstractions;
-using WsACService.Layers.InterProcess.Models;
+using WsACService.InterProcess.Abstractions;
+using WsACService.InterProcess.Models;
 
-namespace WsACService.Layers.InterProcess;
+namespace WsACService.InterProcess;
 
 public class FrameWriter(ILowLevelWriter writer)
 {

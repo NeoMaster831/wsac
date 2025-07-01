@@ -1,6 +1,6 @@
-using WsACService.Layers.InterProcess.Models;
+using WsACService.InterProcess.Models;
 
-namespace WsACService.Layers.InterProcess.Abstractions;
+namespace WsACService.InterProcess.Abstractions;
 
 public interface IFrameHandler
 {

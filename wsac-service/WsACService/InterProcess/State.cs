@@ -1,4 +1,4 @@
-namespace WsACService.Layers.InterProcess;
+namespace WsACService.InterProcess;
 
 public enum State
 {

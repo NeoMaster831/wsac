@@ -1,6 +1,6 @@
 using WsACService.Memory;
 
-namespace WsACService.Layers.InterProcess.Abstractions;
+namespace WsACService.InterProcess.Abstractions;
 
 public interface ILowLevelReader
 {

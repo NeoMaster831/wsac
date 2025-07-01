@@ -1,8 +1,7 @@
-using WsACService.InterProcess;
-using WsACService.Layers.InterProcess.Abstractions;
-using WsACService.Layers.InterProcess.Models;
+using WsACService.InterProcess.Abstractions;
+using WsACService.InterProcess.Models;
 
-namespace WsACService.Layers.InterProcess.Handlers;
+namespace WsACService.InterProcess.Handlers;
 
 [FrameHandler]
 public class ResetHandler : IFrameHandler

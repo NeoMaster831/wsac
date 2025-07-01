@@ -1,10 +1,10 @@
-using WsACService.Layers.InterProcess.Abstractions;
-using WsACService.Layers.InterProcess.Handlers;
-using WsACService.Layers.InterProcess.Models;
+using WsACService.InterProcess.Abstractions;
+using WsACService.InterProcess.Handlers;
+using WsACService.InterProcess.Models;
 using WsACService.Logging;
 using WsACService.Memory;
 
-namespace WsACService.Layers.InterProcess;
+namespace WsACService.InterProcess;
 
 public class FrameSession(int id, ILogger logger, ILowLevelWriter writer, ILowLevelReader reader)
 {
