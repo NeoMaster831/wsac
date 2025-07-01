@@ -1,4 +1,5 @@
 using WsACService.InterProcess.Abstractions;
+using WsACService.InterProcess.Handlers;
 using WsACService.InterProcess.Models;
 using WsACService.Logging;
 using WsACService.Memory;
@@ -61,6 +62,7 @@ public class Session(int id, ILogger logger, ILowLevelWriter writer, ILowLevelRe
 
             await ReadBodyAsync(buffer, header, ct);
 
+            var handled = false;
             foreach (var handler in FrameHandler.All)
             {
                 if (!handler.IsTarget(header.Signature))
@@ -87,6 +89,13 @@ public class Session(int id, ILogger logger, ILowLevelWriter writer, ILowLevelRe
                     buffer
                 );
                 await handler.HandleAsync(this, frame, ct);
+                handled = true;
+            }
+
+            if (!handled)
+            {
+                // TODO : make event
+                Logger.Warn(Id, $"unhandled frame (signature: 0x{header.Signature:X})");
             }
         }
 
