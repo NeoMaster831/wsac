@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WsACService", "WsACService.csproj", "{23A2D82C-F3FE-4825-B3B1-61CD5D2B79C1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WsACService", "WsACService/WsACService.csproj", "{23A2D82C-F3FE-4825-B3B1-61CD5D2B79C1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WsACService.Generator", "WsACService.Generator\WsACService.Generator.csproj", "{6C9BBA17-0515-4E05-8A0B-261EE66252D9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -12,5 +14,9 @@ Global
 		{23A2D82C-F3FE-4825-B3B1-61CD5D2B79C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{23A2D82C-F3FE-4825-B3B1-61CD5D2B79C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{23A2D82C-F3FE-4825-B3B1-61CD5D2B79C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C9BBA17-0515-4E05-8A0B-261EE66252D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C9BBA17-0515-4E05-8A0B-261EE66252D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C9BBA17-0515-4E05-8A0B-261EE66252D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C9BBA17-0515-4E05-8A0B-261EE66252D9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
