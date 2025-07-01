@@ -1,10 +1,10 @@
-using WsACService.Memory;
-
-namespace WsACService.InterProcess.Abstractions;
+namespace WsACService.IO.Abstractions;
 
 public interface ILowLevelReader
 {
-    public Task ReadAsync(MemoryBuffer buffer, long size, CancellationToken ct);
+    public Stream AsStream();
+    
+    public Task ReadAsync(Stream stream, long size, CancellationToken ct);
 
     public void Read(Span<byte> buffer, CancellationToken ct);
     

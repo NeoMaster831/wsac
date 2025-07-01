@@ -1,8 +1,10 @@
+using WsACService.InProcess;
 using WsACService.InterProcess.Abstractions;
 using WsACService.InterProcess.Handlers;
 using WsACService.InterProcess.Models;
+using WsACService.IO;
+using WsACService.IO.Abstractions;
 using WsACService.Logging;
-using WsACService.Memory;
 
 namespace WsACService.InterProcess;
 
@@ -10,10 +12,11 @@ public class FrameSession(int id, ILogger logger, ILowLevelWriter writer, ILowLe
 {
     public int     Id     { get; } = id;
     public ILogger Logger { get; } = logger;
-    public FrameWriter Writer { get; } = new(writer);
-    public StateStore StateStore { get; } = new();
 
-    
+    public FrameSessionState State { get; set; } = FrameSessionState.READY;
+
+    public PacketSession NextSession { get; } = new();
+
     public async Task RunAsync(CancellationToken ct)
     {
         try
@@ -30,21 +33,13 @@ public class FrameSession(int id, ILogger logger, ILowLevelWriter writer, ILowLe
         }
     }
 
-    private async Task RequestResetAsync(CancellationToken ct)
-    {
-        var initialResetFrame = new Frame(Signature.RESET);
-        await Writer.WriteAsync(initialResetFrame, ct);
-        StateStore.State = State.NONE;
-    }
-
     private async Task RunAsyncInternal(CancellationToken ct)
     {
-        var buffer   = new MemoryBuffer();
         var preamble = new byte[Consts.Preamble.Length];
 
-        await RequestResetAsync(ct);
+        RequestCheckpoint();
 
-        while (!ct.IsCancellationRequested) // TODO : state check
+        while (!ct.IsCancellationRequested)
         {
             if (!ReceivePreamble(preamble, ct))
             {
@@ -56,50 +51,50 @@ public class FrameSession(int id, ILogger logger, ILowLevelWriter writer, ILowLe
             if (!ReadHeader(out var header, ct))
             {
                 // TODO : make event
-                await RequestResetAsync(ct);
+                RequestCheckpoint();
                 continue;
             }
 
-            await ReadBodyAsync(buffer, header, ct);
+            var body = new CountingStream(reader.AsStream(), header.DataSize);
 
-            var handled = false;
-            foreach (var handler in FrameHandler.All)
-            {
-                if (!handler.IsTarget(header.Signature))
-                    continue;
-
-                var isNone  = StateStore.State == State.NONE;
-                var isReset = handler is ResetHandler;
-                if (isNone && !isReset)
-                {
-                    // TODO : make event
-                    Logger.Warn(Id, "regular signal on NONE state; skipping...");
-                    break;
-                }
-                if (!isNone && isReset)
-                {
-                    // TODO : make event
-                    Logger.Warn(Id, "reset signal on READY state; skipping...");
-                    break;
-                }
-
-                var frame = new Frame(
-                    header.Signature,
-                    header.DataSize,
-                    buffer
-                );
-                await handler.HandleAsync(this, frame, ct);
-                handled = true;
-            }
-
-            if (!handled)
+            var handler = FrameHandler.All.FirstOrDefault(handler => handler.IsTarget(header.Signature));
+            if (handler is null)
             {
                 // TODO : make event
                 Logger.Warn(Id, $"unhandled frame (signature: 0x{header.Signature:X})");
+                await reader.SkipAsync(header.DataSize, ct);
+                continue;
+            }
+            
+            if (State == FrameSessionState.NONE && handler is not CheckpointHandler)
+            {
+                Logger.Warn(Id, "non-reset signal on NONE state; skipping...");
+                break;
+            }
+            
+            await handler.HandleAsync(this, header, body, ct);
+
+            if (body.ReadSize != header.DataSize)
+            {
+                // TODO : make event
+                Logger.Warn(Id, "handler only consumes partial body");
+                await reader.SkipAsync(header.DataSize - body.ReadSize, ct);
             }
         }
 
         Logger.Info(Id, "session closed successfully");
+    }
+
+    public void SendCheckpoint()
+    {
+        var initialResetFrame = new FrameHeader(Signature.CHECKPOINT, 0);
+        writer.Write(initialResetFrame);
+    }
+    
+    private void RequestCheckpoint()
+    {
+        SendCheckpoint();
+        State = FrameSessionState.NONE;
     }
 
     private bool ReadHeader(out FrameHeader header, CancellationToken ct)
@@ -112,21 +107,6 @@ public class FrameSession(int id, ILogger logger, ILowLevelWriter writer, ILowLe
             throw new InsufficientMemoryException($"Peer sends too big payload ({header.DataSize} bytes)");
 
         return true;
-    }
-
-    private async Task ReadBodyAsync(MemoryBuffer buffer, FrameHeader header, CancellationToken ct)
-    {
-        if (header.Signature != Signature.RESET)
-        {
-            buffer.Reserve(header.DataSize);
-            await reader.ReadAsync(buffer, header.DataSize, ct);
-        }
-        else if (header.DataSize > 0)
-        {
-            // TODO : make event
-            Logger.Warn(Id, "reset frame has data; skipping...");
-            await reader.SkipAsync(header.DataSize, ct);
-        }
     }
 
     private bool ReceivePreamble(Span<byte> buffer, CancellationToken ct)

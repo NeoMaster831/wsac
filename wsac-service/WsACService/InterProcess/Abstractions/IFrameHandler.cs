@@ -6,5 +6,5 @@ public interface IFrameHandler
 {
     public bool IsTarget(Signature signature);
 
-    public Task HandleAsync(FrameSession session, Frame frame, CancellationToken ct);
+    public Task HandleAsync(FrameSession session, FrameHeader header, Stream body, CancellationToken ct);
 }

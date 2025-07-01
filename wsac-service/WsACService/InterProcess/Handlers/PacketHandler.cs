@@ -11,8 +11,8 @@ public class PacketHandler : IFrameHandler
         return signature is Signature.REGULAR;
     }
 
-    public Task HandleAsync(Session session, Frame frame, CancellationToken ct)
+    public Task HandleAsync(FrameSession session, FrameHeader header, Stream body, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        return session.NextSession.HandleAsync(body, ct);
     }
 }

@@ -1,18 +1,38 @@
+using System.Buffers;
 using System.IO.Pipes;
 using WsACService.InterProcess.Abstractions;
-using WsACService.Memory;
+using WsACService.IO.Abstractions;
 using WsACService.Net;
 
 namespace WsACService.InterProcess.Pipe;
 
 public class PipeLowLevelReader(PipeStream pipe) : ILowLevelReader
 {
-    private readonly MemoryBuffer _buffer = new();
-
-    public async Task ReadAsync(MemoryBuffer buffer, long size, CancellationToken ct)
+    public Stream AsStream()
     {
-        buffer.Reserve(size);
-        await pipe.ReadAsync(buffer, size, ct);
+        return pipe;
+    }
+    
+    private async Task ReadAsyncInternal(Stream? stream, long size, CancellationToken ct)
+    {
+        using var buffer = MemoryPool<byte>.Shared.Rent(8192);
+
+        for (long i = 0; i < size && !ct.IsCancellationRequested;)
+        {
+            var read = await pipe.ReadAsync(buffer.Memory, ct);
+            if (read == 0)
+                throw new EndOfStreamException();
+
+            stream?.Write(buffer.Memory.Span[..read]);
+            i += read;
+        }
+
+        ct.ThrowIfCancellationRequested();
+    }
+
+    public Task ReadAsync(Stream? stream, long size, CancellationToken ct)
+    {
+        return ReadAsyncInternal(stream, size, ct);
     }
 
     public void Read(Span<byte> buffer, CancellationToken ct)
@@ -27,6 +47,6 @@ public class PipeLowLevelReader(PipeStream pipe) : ILowLevelReader
 
     public Task SkipAsync(long size, CancellationToken ct)
     {
-        return pipe.SkipAsync(_buffer, size, ct);
+        return ReadAsyncInternal(null, size, ct);
     }
 }

@@ -23,6 +23,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="InProcess\Models\" />
       <Folder Include="States\" />
     </ItemGroup>
 </Project>

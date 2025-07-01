@@ -1,6 +1,6 @@
 using System.IO.Pipes;
 using WsACService.InterProcess.Abstractions;
-using WsACService.Memory;
+using WsACService.IO.Abstractions;
 
 namespace WsACService.InterProcess.Pipe;
 
@@ -20,8 +20,8 @@ public class PipeLowLevelWriter(PipeStream pipe) : ILowLevelWriter
         }
     }
 
-    public Task WriteAsync(MemoryBuffer buffer, long size, CancellationToken ct)
+    public Task WriteAsync(Stream stream, CancellationToken ct)
     {
-        return pipe.WriteAsync(buffer, size, ct);
+        return stream.CopyToAsync(pipe, ct);
     }
 }
