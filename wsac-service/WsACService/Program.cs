@@ -1,4 +1,3 @@
-using WsACService.Logging;
 using WsACService.Services;
 
 namespace WsACService;
@@ -14,7 +13,6 @@ public static class Program
         var builder = Host.CreateEmptyApplicationBuilder(settings);
 
         builder.Services
-            .AddSingleton<GlobalLogger>()
             .AddHostedService<PipeSessionService>();
 
         var host = builder.Build();
