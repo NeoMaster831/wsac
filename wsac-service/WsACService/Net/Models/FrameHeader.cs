@@ -7,17 +7,17 @@ namespace WsACService.Net.Models;
 public struct FrameHeader
 {
     public readonly     FrameSignature Signature;
-    public readonly     long      DataSize;
-    public unsafe fixed byte      Nonce[12];
-    public unsafe fixed byte      MAC[16];
+    public readonly     long           DataSize;
+    public unsafe fixed byte           Nonce[12];
+    public unsafe fixed byte           MAC[16];
 
     public FrameHeader(FrameSignature signature, long size)
     {
         Signature = signature;
-        DataSize = size;
+        DataSize  = size;
         Sign();
     }
-    
+
     private void Sign()
     {
         Span<byte> buffer = stackalloc byte[10];

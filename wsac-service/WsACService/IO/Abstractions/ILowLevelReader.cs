@@ -2,7 +2,7 @@ namespace WsACService.IO.Abstractions;
 
 public interface ILowLevelReader
 {
-    public long Available { get; set; }
+    public long Available { get; }
 
     public ILowLevelReader CreateChild(long size);
     

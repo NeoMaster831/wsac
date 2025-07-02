@@ -31,11 +31,37 @@ public class FrameSession(int id, ILogger logger, ILowLevelWriter writer, ILowLe
         }
     }
 
+    private async Task HandleFrameAsync(FrameHeader header, ILowLevelReader body, CancellationToken ct)
+    {
+        var handler = FrameHandler.All.FirstOrDefault(handler => handler.IsTarget(header.Signature));
+        if (handler is null)
+        {
+            // TODO : make event
+            Logger.Warn(Id, $"unhandled frame (signature: 0x{header.Signature:X})");
+            await body.SkipAsync(header.DataSize, ct);
+            return;
+        }
+
+        if (State == FrameSessionState.NONE && handler is not CheckpointHandler)
+        {
+            Logger.Warn(Id, "regular data on NONE state; skipping...");
+            await body.SkipAsync(header.DataSize, ct);
+            return;
+        }
+
+        await handler.HandleAsync(this, header, body, ct);
+
+        if (body.Available != 0)
+        {
+            // TODO : make event
+            Logger.Warn(Id, "handler only consumes partial body");
+            await body.SkipAsync(body.Available, ct);
+        }
+    }
+
     private async Task RunAsyncInternal(CancellationToken ct)
     {
         var preamble = new byte[Consts.Preamble.Length];
-
-        RequestCheckpoint();
 
         while (!ct.IsCancellationRequested)
         {
@@ -53,31 +79,8 @@ public class FrameSession(int id, ILogger logger, ILowLevelWriter writer, ILowLe
                 continue;
             }
 
-            reader.Available = header.DataSize;
-
-            var handler = FrameHandler.All.FirstOrDefault(handler => handler.IsTarget(header.Signature));
-            if (handler is null)
-            {
-                // TODO : make event
-                Logger.Warn(Id, $"unhandled frame (signature: 0x{header.Signature:X})");
-                await reader.SkipAsync(header.DataSize, ct);
-                continue;
-            }
-            
-            if (State == FrameSessionState.NONE && handler is not CheckpointHandler)
-            {
-                Logger.Warn(Id, "non-reset signal on NONE state; skipping...");
-                break;
-            }
-            
-            await handler.HandleAsync(this, header, reader, ct);
-
-            if (reader.Available != 0)
-            {
-                // TODO : make event
-                Logger.Warn(Id, "handler only consumes partial body");
-                await reader.SkipAsync(reader.Available, ct);
-            }
+            var bodyReader = reader.CreateChild(header.DataSize);
+            await HandleFrameAsync(header, bodyReader, ct);
         }
 
         Logger.Info(Id, "session closed successfully");
@@ -88,7 +91,7 @@ public class FrameSession(int id, ILogger logger, ILowLevelWriter writer, ILowLe
         var initialResetFrame = new FrameHeader(FrameSignature.Checkpoint, 0);
         writer.Write(initialResetFrame);
     }
-    
+
     private void RequestCheckpoint()
     {
         SendCheckpoint();

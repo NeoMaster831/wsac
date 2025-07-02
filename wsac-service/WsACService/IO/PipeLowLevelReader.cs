@@ -22,7 +22,7 @@ public class PipeLowLevelReader : ILowLevelReader
         Available = long.MaxValue;
     }
 
-    public long Available { get; set; }
+    public long Available { get; private set; }
 
     private async Task ReadAsyncInternal(Stream? stream, long size, CancellationToken ct)
     {
