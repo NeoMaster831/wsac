@@ -2,37 +2,42 @@
 
 #include "Include.hpp"
 
-#include <ranges>
+namespace wsac
+{
 
-namespace wsac {
+struct HostNotCurrentException final : std::exception
+{
+};
 
-class Host {
-    std::unordered_map<std::string, std::pair<void *, void(*)(void *)>> _registered;
+struct HostAlreadyCurrentException final : std::exception
+{
+};
+
+class Host
+{
+    std::unordered_map<std::string, std::pair<void *, void (*)(void *)>> _registered;
     std::stop_source _ss;
     bool _disposed = false;
 
-public:
-    static Host& Current();
+  public:
+    static Host &Current();
 
     Host();
 
-    template<typename T>
-    void Add()
+    template <typename T> void Add()
     {
         auto *v = new T(_ss.get_token());
-        _registered[typeid(T).name()] = std::make_pair(v, [](void *vp) { delete static_cast<T*>(vp); });
+        _registered[typeid(T).name()] = std::make_pair(v, [](void *vp) { delete static_cast<T *>(vp); });
     }
 
-    template<typename T>
-    T& Get()
+    template <typename T> T &Get()
     {
-        return *static_cast<T*>(_registered.at(typeid(T).name()).first);
+        return *static_cast<T *>(_registered.at(typeid(T).name()).first);
     }
 
-    template<typename T>
-    const T& Get() const
+    template <typename T> const T &Get() const
     {
-        return *static_cast<T*>(_registered.at(typeid(T).name()).first);
+        return *static_cast<T *>(_registered.at(typeid(T).name()).first);
     }
 
     ~Host()
@@ -49,4 +54,4 @@ public:
     }
 };
 
-} // wsac
+} // namespace wsac

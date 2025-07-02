@@ -12,8 +12,7 @@ Host &Host::Current()
 {
     if (!_current)
     {
-        // TODO : use custom exception
-        throw std::exception();
+        throw HostNotCurrentException();
     }
 
     return *_current;
@@ -23,10 +22,8 @@ Host::Host()
 {
     if (_current)
     {
-        // TODO : use custom exception
-        throw std::exception();
+        throw HostAlreadyCurrentException();
     }
-
     _current = this;
 }
 

@@ -1,27 +1,27 @@
 #pragma once
 
+#include "IO/PipeReader.hpp"
+#include "IO/PipeWriter.hpp"
 #include "Include.hpp"
-#include "MessageReader.hpp"
-#include "MessageWriter.hpp"
 
 namespace wsac::net
 {
 
-class CommService
+class Comm
 {
     HANDLE _pipe;
-    MessageReader _reader;
-    MessageWriter _writer;
+    io::PipeReader _reader;
+    io::PipeWriter _writer;
 
   public:
-    explicit CommService(std::stop_token);
-    ~CommService();
+    explicit Comm(const std::stop_token&);
+    ~Comm();
 
     [[nodiscard]]
-    const MessageReader &GetReader() const noexcept;
+    io::PipeReader & GetReader();
 
     [[nodiscard]]
-    const MessageWriter &GetWriter() const noexcept;
+    io::PipeWriter & GetWriter();
 };
 
 } // namespace wsac::net
