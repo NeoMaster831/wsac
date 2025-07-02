@@ -1,6 +1,6 @@
 using WsACService.InProcess;
 using WsACService.InterProcess.Abstractions;
-using WsACService.InterProcess.Handlers;
+using WsACService.InterProcess.FrameHandlers;
 using WsACService.InterProcess.Models;
 using WsACService.IO;
 using WsACService.IO.Abstractions;
@@ -87,7 +87,7 @@ public class FrameSession(int id, ILogger logger, ILowLevelWriter writer, ILowLe
 
     public void SendCheckpoint()
     {
-        var initialResetFrame = new FrameHeader(Signature.CHECKPOINT, 0);
+        var initialResetFrame = new FrameHeader(FrameSignature.Checkpoint, 0);
         writer.Write(initialResetFrame);
     }
     

@@ -1,6 +1,6 @@
 using System.IO.Pipes;
 using WsACService.InterProcess;
-using WsACService.InterProcess.Pipe;
+using WsACService.IO;
 
 namespace WsACService.Services;
 

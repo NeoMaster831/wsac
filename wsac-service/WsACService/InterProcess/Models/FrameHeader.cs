@@ -6,12 +6,12 @@ namespace WsACService.InterProcess.Models;
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
 public struct FrameHeader
 {
-    public readonly     Signature Signature;
+    public readonly     FrameSignature Signature;
     public readonly     long      DataSize;
     public unsafe fixed byte      Nonce[12];
     public unsafe fixed byte      MAC[16];
 
-    public FrameHeader(Signature signature, long size)
+    public FrameHeader(FrameSignature signature, long size)
     {
         Signature = signature;
         DataSize = size;

@@ -1,8 +1,8 @@
 namespace WsACService.InterProcess.Models;
 
-public enum Signature : ushort
+public enum FrameSignature : ushort
 {
     // TODO : set values from cmake
-    CHECKPOINT,
-    REGULAR
+    Checkpoint,
+    Regular
 }

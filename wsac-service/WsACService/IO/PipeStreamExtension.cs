@@ -4,7 +4,7 @@ using System.IO.Pipes;
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 
-namespace WsACService.Net;
+namespace WsACService.IO;
 
 public static partial class PipeStreamExtension
 {
