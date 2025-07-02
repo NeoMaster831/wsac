@@ -1,12 +1,10 @@
 using WsACService.InProcess;
-using WsACService.InterProcess.Abstractions;
-using WsACService.InterProcess.FrameHandlers;
-using WsACService.InterProcess.Models;
-using WsACService.IO;
 using WsACService.IO.Abstractions;
 using WsACService.Logging;
+using WsACService.Net.FrameHandlers;
+using WsACService.Net.Models;
 
-namespace WsACService.InterProcess;
+namespace WsACService.Net;
 
 public class FrameSession(int id, ILogger logger, ILowLevelWriter writer, ILowLevelReader reader)
 {
@@ -55,7 +53,7 @@ public class FrameSession(int id, ILogger logger, ILowLevelWriter writer, ILowLe
                 continue;
             }
 
-            var body = new CountingStream(reader.AsStream(), header.DataSize);
+            reader.Available = header.DataSize;
 
             var handler = FrameHandler.All.FirstOrDefault(handler => handler.IsTarget(header.Signature));
             if (handler is null)
@@ -72,13 +70,13 @@ public class FrameSession(int id, ILogger logger, ILowLevelWriter writer, ILowLe
                 break;
             }
             
-            await handler.HandleAsync(this, header, body, ct);
+            await handler.HandleAsync(this, header, reader, ct);
 
-            if (body.ReadSize != header.DataSize)
+            if (reader.Available != 0)
             {
                 // TODO : make event
                 Logger.Warn(Id, "handler only consumes partial body");
-                await reader.SkipAsync(header.DataSize - body.ReadSize, ct);
+                await reader.SkipAsync(reader.Available, ct);
             }
         }
 
@@ -116,7 +114,7 @@ public class FrameSession(int id, ILogger logger, ILowLevelWriter writer, ILowLe
             buffer[i] = buffer[i + 1];
 
         // P[P0, P1, ... Pn-1, Pn] -> P[P1, P2, ... Pn, Pn+1]
-        reader.Read(buffer.Slice(5, 1), ct);
+        buffer[^1] = reader.Read<byte>(ct);
 
         // P == K?
         return buffer.SequenceEqual(Consts.Preamble);

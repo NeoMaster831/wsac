@@ -12,49 +12,44 @@ public static partial class PipeStreamExtension
     [return: MarshalAs(UnmanagedType.Bool)]
     private static partial bool PeekNamedPipe(
         SafePipeHandle hPipe,
-        IntPtr lpBuffer,
-        uint nBufferSize,
-        IntPtr lpBytesRead,
-        out uint lpTotalBytesAvail,
-        IntPtr lpBytesLeftThisMessage);
+        IntPtr         lpBuffer,
+        uint           nBufferSize,
+        IntPtr         lpBytesRead,
+        out uint       lpTotalBytesAvail,
+        IntPtr         lpBytesLeftThisMessage);
 
     private static bool DataWaiting(this PipeStream ps)
     {
         if (!ps.IsConnected) return false;
-        if (PeekNamedPipe(ps.SafePipeHandle,
-                IntPtr.Zero, 0, IntPtr.Zero,
-                out var available, IntPtr.Zero)) return available > 0;
+        if (PeekNamedPipe(
+                ps.SafePipeHandle,
+                IntPtr.Zero,
+                0,
+                IntPtr.Zero,
+                out var available,
+                IntPtr.Zero))
+            return available > 0;
         var error = Marshal.GetLastWin32Error();
         if (error == 109)
             throw new EndOfStreamException();
         throw new Win32Exception(Marshal.GetLastWin32Error());
     }
 
-    public static void Read(this PipeStream stream, Span<byte> buffer, CancellationToken ct)
+    private static void Read(this PipeStream stream, Span<byte> buffer, CancellationToken ct)
     {
-        const int initialSleep = 10;
-        const int maxSleep = 100 * 1000;
-
-        var sleep = initialSleep;
         for (var i = 0; i < buffer.Length && !ct.IsCancellationRequested;)
         {
             while (!DataWaiting(stream) && !ct.IsCancellationRequested)
-            {
-                Thread.Sleep(TimeSpan.FromMicroseconds(sleep));
-                sleep *= 2;
-                if (sleep > maxSleep)
-                    sleep = maxSleep;
-            }
-
-            sleep = initialSleep;
+                Thread.Yield();
 
             if (ct.IsCancellationRequested)
                 break;
 
-            var j = stream.Read(buffer[i..]);
-            if (j == 0)
+            var read = stream.Read(buffer[i..]);
+            if (read == 0)
                 throw new EndOfStreamException();
-            i += j;
+
+            i += read;
         }
 
         ct.ThrowIfCancellationRequested();
@@ -68,12 +63,5 @@ public static partial class PipeStreamExtension
             stream.Read(buffer, ct);
             return MemoryMarshal.Read<T>(buffer);
         }
-    }
-
-    public static IMemoryOwner<byte> Read(this PipeStream stream, int size, CancellationToken ct)
-    {
-        var buffer = MemoryPool<byte>.Shared.Rent(size);
-        Read(stream, buffer.Memory.Span, ct);
-        return buffer;
     }
 }

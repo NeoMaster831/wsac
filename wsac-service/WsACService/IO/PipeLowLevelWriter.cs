@@ -5,11 +5,6 @@ namespace WsACService.IO;
 
 public class PipeLowLevelWriter(PipeStream pipe) : ILowLevelWriter
 {
-    public void Write(Span<byte> buffer)
-    {
-        pipe.Write(buffer);
-    }
-
     public void Write<T>(T value) where T : unmanaged
     {
         unsafe

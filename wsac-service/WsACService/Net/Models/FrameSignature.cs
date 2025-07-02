@@ -1,4 +1,4 @@
-namespace WsACService.InterProcess.Models;
+namespace WsACService.Net.Models;
 
 public enum FrameSignature : ushort
 {
