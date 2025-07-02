@@ -3,6 +3,7 @@
 #include "Log.hpp"
 #include "Net/Comm.hpp"
 #include "Run/Selector.hpp"
+#include "Run/Session.hpp"
 #include "Run/State.hpp"
 #include "Sec/CryptoService.hpp"
 
@@ -13,10 +14,9 @@ static Host host;
 
 void Enable()
 {
-    host.Add<run::State>();
-    host.Add<net::CommService>();
+
+
     host.Add<sec::CryptoService>();
-    host.Add<run::Selector>();
 }
 
 void Disable()

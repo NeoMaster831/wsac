@@ -1,0 +1,33 @@
+//
+// Created by cve on 2025-07-02.
+//
+
+#include "FrameWriter.hpp"
+
+namespace wsac::io
+{
+
+FrameWriter::FrameWriter(PipeWriter &inner) : _inner(inner)
+{
+}
+void FrameWriter::WriteData(const model::Vector<uint8_t> &data) const
+{
+    _inner.Write(data);
+}
+void FrameWriter::Write(const model::FrameHeader &header) const
+{
+    _inner.Write(PREAMBLE);
+    _inner.Write(header);
+}
+void FrameWriter::WriteCheckpoint() const
+{
+    const model::FrameHeader header(model::FrameSig::Checkpoint, 0);
+    Write(header);
+}
+void FrameWriter::WriteRegularHeader() const
+{
+    const model::FrameHeader header(model::FrameSig::Regular, 0);
+    Write(header);
+}
+
+} // namespace wsac::io

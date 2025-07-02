@@ -12,9 +12,12 @@
 #include <mutex>
 #include <stop_token>
 #include <unordered_map>
+#include <ranges>
 
 #include <cfp/Register.h>
 
 #include <wincrypt.h>
 
 #include "Config.hpp"
+#include "Utils/Exception.hpp"
+#include "Utils/concept.hpp"

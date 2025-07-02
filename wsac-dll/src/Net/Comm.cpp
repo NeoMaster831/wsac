@@ -1,6 +1,9 @@
 #include "Comm.hpp"
 
+#include "Host.hpp"
 #include "Log.hpp"
+#include "Run/State.hpp"
+#include "Sec/PskManager.hpp"
 
 namespace
 {
@@ -10,7 +13,7 @@ HANDLE OpenPipe()
 {
     const std::wstring pipeName = L"\\\\.\\pipe\\" + PipeName;
 
-    const HANDLE pipe = CreateFileW(pipeName.c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
+    void *pipe = CreateFileW(pipeName.c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
     if (pipe == INVALID_HANDLE_VALUE)
     {
         LogLn("Failed to connect to pipe, Error: %x", GetLastError());
@@ -21,31 +24,30 @@ HANDLE OpenPipe()
     return pipe;
 }
 
-void ClosePipe(HANDLE pipe)
+void ClosePipe(void *pipe)
 {
     if (!pipe)
         return;
     CloseHandle(pipe);
-    pipe = nullptr;
 }
 
 } // namespace
 
-wsac::net::CommService::CommService(std::stop_token) : _pipe(OpenPipe()), _reader(_pipe), _writer(_pipe)
+wsac::net::Comm::Comm(const std::stop_token &) : _pipe(OpenPipe()), _reader(_pipe), _writer(_pipe)
 {
 }
 
-wsac::net::CommService::~CommService()
+wsac::net::Comm::~Comm()
 {
     ClosePipe(_pipe);
 }
 
-const wsac::net::MessageReader &wsac::net::CommService::GetReader() const noexcept
+wsac::io::PipeReader &wsac::net::Comm::GetReader()
 {
     return _reader;
 }
 
-const wsac::net::MessageWriter &wsac::net::CommService::GetWriter() const noexcept
+wsac::io::PipeWriter &wsac::net::Comm::GetWriter()
 {
     return _writer;
 }
