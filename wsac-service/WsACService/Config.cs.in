@@ -1,0 +1,16 @@
+// </ auto-generated>
+
+using WsACService.Net.Models;
+
+namespace WsACService;
+
+public static class Config {
+    public const FrameSignature TestSignature = (FrameSignature) @TEST_SIGNATURE@;
+    public const FrameSignature RegularSignature = (FrameSignature) @REGULAR_SIGNATURE@;
+    public const FrameSignature CheckpointSignature = (FrameSignature) @CHECKPOINT_SIGNATURE@;
+
+    public static byte[][] PSK = {
+        new byte[] @PSK_LAYER1@,
+        new byte[] @PSK_LAYER2@,
+    };
+}
