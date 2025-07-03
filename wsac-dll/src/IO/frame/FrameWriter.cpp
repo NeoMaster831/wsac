@@ -29,5 +29,11 @@ void FrameWriter::WriteRegularHeader() const
     const model::FrameHeader header(model::FrameSig::Regular, 0);
     Write(header);
 }
+void FrameWriter::WriteTestData(const model::Bytes data) const
+{
+    const model::FrameHeader header(model::FrameSig::Test, data.size());
+    Write(header);
+    WriteData(data);
+}
 
 } // namespace wsac::io

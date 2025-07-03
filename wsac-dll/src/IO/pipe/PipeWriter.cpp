@@ -15,7 +15,7 @@ void PipeWriter::Write(const model::ConstBytes v) const
     for (DWORD i = 0; i < v.size();)
     {
         DWORD written;
-        if (!WriteFile(_pipe, static_cast<const uint8_t*>(v.data()) + i, v.size() - i, &written, nullptr))
+        if (!WriteFile(_pipe, static_cast<const uint8_t *>(v.data()) + i, v.size() - i, &written, nullptr))
             throw PipeWriteException();
 
         i += written;

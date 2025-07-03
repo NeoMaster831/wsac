@@ -4,8 +4,8 @@
 
 #include "FrameHeader.hpp"
 
-#include "Bytes.hpp"
 #include "Host.hpp"
+#include "Model/Bytes.hpp"
 #include "Run/State.hpp"
 #include "Utils/Crypto/Random.hpp"
 
@@ -36,7 +36,7 @@ void FrameHeader::Sign()
 
 FrameHeader FrameHeader::Null()
 {
-    static FrameHeader header{ FrameSig::Null, 0 };
+    static FrameHeader header{FrameSig::Null, 0};
     return header;
 }
 

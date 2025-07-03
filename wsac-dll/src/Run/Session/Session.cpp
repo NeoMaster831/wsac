@@ -3,10 +3,9 @@
 //
 
 #include "Session.hpp"
-
 #include "Host.hpp"
 #include "Log.hpp"
-#include "State.hpp"
+#include "Run/State.hpp"
 
 namespace wsac::run
 {
@@ -55,7 +54,11 @@ void Session::Run(const std::stop_token &token) const
 {
     LogLn("session started");
 
-    while (token.stop_requested())
+    // Write Test Data
+    constexpr auto testDataBody = (char *)"Echo";
+    _frameWriter.WriteTestData(testDataBody);
+
+    while (!token.stop_requested())
     {
         _frameReader.ReadUntilPreamble(token);
         const auto header = _frameReader.ReadHeader(token);
@@ -71,13 +74,13 @@ void Session::Run(const std::stop_token &token) const
 
         switch (header.sig)
         {
-        case CHECKPOINT_SIGNATURE:
+        case model::Checkpoint:
             HandleCheckpointSignal();
             break;
-        case REGULAR_SIGNATURE:
+        case model::Regular:
             HandleRegularSignal();
             break;
-        case TEST_SIGNATURE:
+        case model::Test:
             HandleTestSignal();
             break;
         default:

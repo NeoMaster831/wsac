@@ -8,7 +8,8 @@ enum FrameSig : uint16_t
 {
     Null = 0,
     Checkpoint = CHECKPOINT_SIGNATURE,
-    Regular = REGULAR_SIGNATURE
+    Regular = REGULAR_SIGNATURE,
+    Test = TEST_SIGNATURE
 };
 
 #pragma pack(push, 1)

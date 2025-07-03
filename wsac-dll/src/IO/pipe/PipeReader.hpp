@@ -13,13 +13,9 @@ class PipeReader
     explicit PipeReader(void *pipe);
     void Read(model::Bytes v, const std::stop_token &st) const;
 
-    template<typename T>
-    void Read(T &v, const std::stop_token &st) const
+    template <typename T> void Read(T &v, const std::stop_token &st) const
     {
-        const model::Bytes ref{
-            reinterpret_cast<uint8_t*>(&v),
-            sizeof(T)
-        };
+        const model::Bytes ref{reinterpret_cast<uint8_t *>(&v), sizeof(T)};
         Read(ref, st);
     }
 };

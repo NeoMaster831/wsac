@@ -29,7 +29,7 @@ void PipeReader::Read(model::Bytes v, const std::stop_token &st) const
             throw StopTokenRequestedException();
 
         DWORD read;
-        if (!ReadFile(_pipe, static_cast<uint8_t*>(v.data()) + i, v.size() - i, &read, nullptr))
+        if (!ReadFile(_pipe, static_cast<uint8_t *>(v.data()) + i, v.size() - i, &read, nullptr))
             throw PipeReadException();
         if (read == 0)
             throw PipeReadException();
@@ -41,4 +41,4 @@ void PipeReader::Read(model::Bytes v, const std::stop_token &st) const
         throw StopTokenRequestedException();
 }
 
-}
+} // namespace wsac::io

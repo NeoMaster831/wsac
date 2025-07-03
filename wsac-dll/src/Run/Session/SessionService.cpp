@@ -25,7 +25,7 @@ void SessionService::Run(const std::stop_token &st) // NOLINT(*-convert-member-f
     try
     {
         auto &currentComm = Host::Current().Get<net::Comm>();
-        Session session(currentComm.GetReader(), currentComm.GetWriter());
+        const Session session(currentComm.GetReader(), currentComm.GetWriter());
         session.Run(st);
     }
     catch (StopTokenRequestedException &)

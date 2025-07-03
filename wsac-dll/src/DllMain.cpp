@@ -2,7 +2,7 @@
 #include "Include.hpp"
 #include "Log.hpp"
 #include "Net/Comm.hpp"
-#include "Run/SessionService.hpp"
+#include "Run/Session/SessionService.hpp"
 #include "Run/State.hpp"
 
 namespace wsac
@@ -14,11 +14,11 @@ bool Enable()
 {
     try
     {
-        host.Add<run::State>(); // First, initialize machine states.
-        host.Add<net::Comm>(); // Second, initialize service communications.
+        host.Add<run::State>();          // First, initialize machine states.
+        host.Add<net::Comm>();           // Second, initialize service communications.
         host.Add<run::SessionService>(); // Third, we start a session.
     }
-    catch (std::exception& e)
+    catch (std::exception &e)
     {
         LogLn("Exception during initialization: %s", e.what());
         return false;

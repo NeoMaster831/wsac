@@ -2,7 +2,7 @@
 
 #include "IO/pipe/PipeReader.hpp"
 #include "Include.hpp"
-#include "Model/FrameHeader.hpp"
+#include "Model/IO/FrameHeader.hpp"
 
 namespace wsac::io
 {
@@ -15,7 +15,7 @@ class FrameReader
   public:
     explicit FrameReader(PipeReader &inner);
 
-    void ReadUntilPreamble(const std::stop_token& st) const;
+    void ReadUntilPreamble(const std::stop_token &st) const;
     [[nodiscard]] model::FrameHeader ReadHeader(const std::stop_token &st) const;
 };
 
