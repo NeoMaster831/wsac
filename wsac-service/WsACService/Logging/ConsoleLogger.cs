@@ -29,7 +29,7 @@ public class ConsoleLogger(string name) : ILogger
             var old = Console.ForegroundColor;
             Console.ForegroundColor = ColorMap[logLevel];
 
-            Console.Write($"[{eventId.Id,2}: {logLevel,-12}]    {name} - {formatter(state, exception)}");
+            Console.WriteLine($"[{eventId.Id,2}: {logLevel,-12}]    {name} - {formatter(state, exception)}");
 
             Console.ForegroundColor = old;
         }

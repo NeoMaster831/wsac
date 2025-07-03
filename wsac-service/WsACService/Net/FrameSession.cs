@@ -90,6 +90,9 @@ public class FrameSession(ILogger logger, SessionState state, IWriter writer, IR
 
             if (!ReadHeader(out var header, ct))
             {
+                logger.LogDebug("received:\n{}", header);
+                logger.LogDebug("expected:\n{}", header.Sign());
+                
                 // TODO : make event
                 logger.LogError("broken header integrity; requesting checkpoint...");
                 RequestCheckpoint();
