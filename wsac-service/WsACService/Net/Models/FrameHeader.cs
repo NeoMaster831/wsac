@@ -11,7 +11,7 @@ public struct FrameHeader
     public unsafe fixed byte           Nonce[12];
     public unsafe fixed byte           MAC[16];
 
-    public FrameHeader(FrameSignature signature, long size)
+    public FrameHeader(FrameSignature signature, long size = 0)
     {
         Signature = signature;
         DataSize  = size;

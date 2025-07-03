@@ -1,4 +1,6 @@
+using WsACService.IO;
 using WsACService.IO.Abstractions;
+using WsACService.Net.Abstractions;
 using WsACService.Net.FrameHandlers;
 using WsACService.Net.Models;
 
@@ -6,7 +8,8 @@ namespace WsACService.Net;
 
 public class FrameSession(ILogger logger, SessionState state, IWriter writer, IReader reader)
 {
-    public SessionState State { get; } = state;
+    public SessionState State       { get; } = state;
+    public FrameWriter  FrameWriter { get; } = new(writer);
 
     public async Task RunAsync(CancellationToken ct)
     {
@@ -26,7 +29,15 @@ public class FrameSession(ILogger logger, SessionState state, IWriter writer, IR
 
     private async Task HandleFrameAsync(FrameHeader header, IReader body, CancellationToken ct)
     {
-        var handler = FrameHandler.All.FirstOrDefault(handler => handler.IsTarget(header.Signature));
+        IFrameHandler? handler = null;
+        foreach (var candidate in FrameHandler.All)
+        {
+            if (!candidate.IsTarget(header.Signature))
+                continue;
+            handler = candidate;
+            break;
+        }
+
         if (handler is null)
         {
             // TODO : make event
@@ -55,7 +66,7 @@ public class FrameSession(ILogger logger, SessionState state, IWriter writer, IR
     private async Task RunAsyncInternal(CancellationToken ct)
     {
         var preamble = new Preamble();
-        
+
         while (!ct.IsCancellationRequested)
         {
             if (!ReceivePreamble(ref preamble, ct))
@@ -81,8 +92,8 @@ public class FrameSession(ILogger logger, SessionState state, IWriter writer, IR
 
     public void SendCheckpoint()
     {
-        var initialResetFrame = new FrameHeader(FrameSignature.Checkpoint, 0);
-        writer.Write(initialResetFrame);
+        var frame = new FrameHeader(FrameSignature.Checkpoint);
+        FrameWriter.Write(frame);
     }
 
     private void RequestCheckpoint()
