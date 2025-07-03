@@ -4,10 +4,10 @@
 
 #include "FrameHeader.hpp"
 
-#include "../Utils/Crypto/Random.hpp"
+#include "Bytes.hpp"
 #include "Host.hpp"
 #include "Run/State.hpp"
-#include "Vector.hpp"
+#include "Utils/Crypto/Random.hpp"
 
 namespace wsac::model
 {
@@ -28,9 +28,9 @@ void FrameHeader::Sign()
 {
     crypto::Random::Fill(nonce);
 
-    const Vector ref{reinterpret_cast<uint8_t *>(this), sizeof sig + sizeof dataSize};
+    const Bytes ref{reinterpret_cast<uint8_t *>(this), sizeof sig + sizeof dataSize};
 
-    const auto &cipher = Host::Get<run::State>().Layer1PskEncryptor;
+    const auto &cipher = Host::Current().Get<run::State>().Layer1PskEncryptor;
     cipher.Sign(ref, nonce, mac);
 }
 

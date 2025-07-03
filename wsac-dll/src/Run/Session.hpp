@@ -12,7 +12,7 @@ class Session
     io::FrameReader _frameReader;
     io::FrameWriter _frameWriter;
 
-    void HandleCheckpointSignal();
+    void HandleCheckpointSignal() const;
     void HandleRegularSignal();
     void HandleInvalidSignal() const;
 

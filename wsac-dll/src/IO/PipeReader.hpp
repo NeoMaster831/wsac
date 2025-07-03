@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../Model/Vector.hpp"
 #include "Include.hpp"
+#include "Model/Bytes.hpp"
 
 namespace wsac::io
 {
@@ -11,12 +11,12 @@ class PipeReader
 
   public:
     explicit PipeReader(void *pipe);
-    void Read(model::Vector<uint8_t> &v, const std::stop_token &st) const;
+    void Read(model::Bytes v, const std::stop_token &st) const;
 
     template<typename T>
     void Read(T &v, const std::stop_token &st) const
     {
-        model::Vector ref{
+        const model::Bytes ref{
             reinterpret_cast<uint8_t*>(&v),
             sizeof(T)
         };

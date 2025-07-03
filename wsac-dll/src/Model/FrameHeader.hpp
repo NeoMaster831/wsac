@@ -16,8 +16,8 @@ struct FrameHeader
 {
     FrameSig sig;
     uint64_t dataSize;
-    std::array<uint8_t, 12> nonce;
-    std::array<uint8_t, 16> mac;
+    std::array<uint8_t, 12> nonce{};
+    std::array<uint8_t, 16> mac{};
 
     FrameHeader() = delete;
     FrameHeader(FrameSig sig, uint64_t size);

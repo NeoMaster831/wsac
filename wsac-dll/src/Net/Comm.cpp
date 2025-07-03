@@ -1,9 +1,6 @@
 #include "Comm.hpp"
 
-#include "Host.hpp"
 #include "Log.hpp"
-#include "Run/State.hpp"
-#include "Sec/PskManager.hpp"
 
 namespace
 {
@@ -17,8 +14,7 @@ HANDLE OpenPipe()
     if (pipe == INVALID_HANDLE_VALUE)
     {
         LogLn("Failed to connect to pipe, Error: %x", GetLastError());
-        // TODO : Use custom exception
-        throw std::exception();
+        throw wsac::io::PipeOpenFailedException();
     }
 
     return pipe;

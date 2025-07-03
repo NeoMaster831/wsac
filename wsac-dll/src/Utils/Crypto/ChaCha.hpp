@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../Model/Vector.hpp"
+#include "../../Model/Bytes.hpp"
 #include "Include.hpp"
 
 namespace wsac::crypto
@@ -24,10 +24,9 @@ class ChaCha20
     explicit ChaCha20(const std::array<uint8_t, KeyLen> &key);
     ~ChaCha20();
 
-    void SealBase(const Vector<uint8_t> &plain, const Nonce &nonce, const Vector<uint8_t> &authInfo, Mac &outMac,
-                  Vector<uint8_t> &outCipher) const;
-    void Seal(const Vector<uint8_t> &plain, const Nonce &nonce, Mac &outMac, Vector<uint8_t> &outCipher) const;
-    void Open(const Vector<uint8_t> &cipher, const Nonce &nonce, Mac &mac, Vector<uint8_t> &outPlain) const;
-    void Sign(const Vector<uint8_t> &message, const Nonce &nonce, Mac &outMac) const;
+    void SealBase(ConstBytes plain, const Nonce &nonce, ConstBytes authInfo, Mac &outMac, Bytes outCipher) const;
+    void Seal(ConstBytes plain, const Nonce &nonce, Mac &outMac, Bytes outCipher) const;
+    void Open(ConstBytes cipher, const Nonce &nonce, Mac &mac, Bytes outPlain) const;
+    void Sign(ConstBytes message, const Nonce &nonce, Mac &outMac) const;
 };
 } // namespace wsac::crypto

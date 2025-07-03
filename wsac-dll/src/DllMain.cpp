@@ -2,21 +2,29 @@
 #include "Include.hpp"
 #include "Log.hpp"
 #include "Net/Comm.hpp"
-#include "Run/Selector.hpp"
-#include "Run/Session.hpp"
+#include "Run/SessionService.hpp"
 #include "Run/State.hpp"
-#include "Sec/CryptoService.hpp"
 
 namespace wsac
 {
 
 static Host host;
 
-void Enable()
+bool Enable()
 {
+    try
+    {
+        host.Add<run::State>(); // First, initialize machine states.
+        host.Add<net::Comm>(); // Second, initialize service communications.
+        host.Add<run::SessionService>(); // Third, we start a session.
+    }
+    catch (std::exception& e)
+    {
+        LogLn("Exception during initialization: %s", e.what());
+        return false;
+    }
 
-
-    host.Add<sec::CryptoService>();
+    return true;
 }
 
 void Disable()
@@ -28,16 +36,7 @@ void Disable()
 
 extern "C" __declspec(dllexport) BOOLEAN Enable()
 {
-    try
-    {
-        wsac::Enable();
-        return TRUE;
-    }
-    catch (std::exception& e)
-    {
-        LogLn("%s", e.what());
-        return FALSE;
-    }
+    return wsac::Enable() ? TRUE : FALSE;
 }
 
 extern "C" __declspec(dllexport) void Disable()

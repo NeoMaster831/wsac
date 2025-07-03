@@ -11,12 +11,13 @@
 namespace wsac::run
 {
 
-void Session::HandleCheckpointSignal()
+void Session::HandleCheckpointSignal() const
 {
-    if (const auto &layer1State = Host::Get<State>().Layer1State; layer1State.Base == State::LAYER1_BASE_NONE)
+    LogLn("checkpoint signal received");
+    if (auto &layer1State = Host::Current().Get<State>().Layer1State; layer1State.Base == State::LAYER1_BASE_NONE)
     {
         // Case 1: The client requested a checkpoint. Now the system has been syncronized.
-        Host::Get<State>().Layer1State.Base = State::LAYER1_BASE_READY;
+        layer1State.Base = State::LAYER1_BASE_READY;
     }
     else
     {
@@ -27,11 +28,13 @@ void Session::HandleCheckpointSignal()
 
 void Session::HandleRegularSignal()
 {
-    LogLn("Wowie handle handle");
+    LogLn("regular signal received");
 }
 
 void Session::HandleInvalidSignal() const
 {
+    LogLn("invalid signal received");
+
     // TODO: Report
 
     // We have to recover. So we write checkpoint.
@@ -44,6 +47,8 @@ Session::Session(io::PipeReader &reader, io::PipeWriter &writer) : _frameReader(
 
 void Session::Run(const std::stop_token &token)
 {
+    LogLn("session started");
+
     while (token.stop_requested())
     {
         _frameReader.ReadUntilPreamble(token);
@@ -51,10 +56,12 @@ void Session::Run(const std::stop_token &token)
 
         if (!header.Validate())
         {
+            LogLn("header validation failed!");
             _frameWriter.WriteCheckpoint();
-            Host::Get<State>().Layer1State.Base = State::LAYER1_BASE_NONE;
+            Host::Current().Get<State>().Layer1State.Base = State::LAYER1_BASE_NONE;
             continue;
         }
+        LogLn("header validation passed");
 
         switch (header.sig)
         {
@@ -68,6 +75,8 @@ void Session::Run(const std::stop_token &token)
             HandleInvalidSignal();
         }
     }
+
+    LogLn("session ended");
 }
 
 } // namespace wsac::run

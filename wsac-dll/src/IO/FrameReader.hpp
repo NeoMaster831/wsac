@@ -16,7 +16,7 @@ class FrameReader
     explicit FrameReader(PipeReader &inner);
 
     void ReadUntilPreamble(const std::stop_token& st) const;
-    model::FrameHeader ReadHeader(const std::stop_token &st) const;
+    [[nodiscard]] model::FrameHeader ReadHeader(const std::stop_token &st) const;
 };
 
 } // namespace wsac::io

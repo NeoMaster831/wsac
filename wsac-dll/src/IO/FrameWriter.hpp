@@ -18,7 +18,7 @@ class FrameWriter
   public:
     explicit FrameWriter(PipeWriter &inner);
 
-    void WriteData(const model::Vector<uint8_t> &data) const;
+    void WriteData(model::Bytes data) const;
     void Write(const model::FrameHeader &header) const;
     void WriteCheckpoint() const;
     void WriteRegularHeader() const;
