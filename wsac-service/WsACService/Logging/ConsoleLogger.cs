@@ -2,7 +2,7 @@ namespace WsACService.Logging;
 
 public class ConsoleLogger(string name) : ILogger
 {
-    private Dictionary<LogLevel, ConsoleColor> ColorMap { get; set; } = new()
+    private Dictionary<LogLevel, ConsoleColor> ColorMap { get; } = new()
     {
         [LogLevel.Trace]       = ConsoleColor.Gray,
         [LogLevel.Debug]       = ConsoleColor.Cyan,
