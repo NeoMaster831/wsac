@@ -1,3 +1,3 @@
 # wsac-dll
 
-Gayz
+Wane's anticheat usermode module.

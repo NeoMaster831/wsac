@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../Model/Vector.hpp"
 #include "Include.hpp"
+#include "Model/Bytes.hpp"
 
 namespace wsac::io
 {
@@ -11,7 +11,7 @@ class PipeWriter
 
   public:
     explicit PipeWriter(void *pipe);
-    void Write(const model::Vector<uint8_t> &v) const;
+    void Write(model::ConstBytes v) const;
 };
 
 } // namespace wsac::io

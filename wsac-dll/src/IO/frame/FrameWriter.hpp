@@ -4,9 +4,8 @@
 
 #pragma once
 
-#include "Include.hpp"
-#include "Model/FrameHeader.hpp"
-#include "PipeWriter.hpp"
+#include "IO/pipe/PipeWriter.hpp"
+#include "Model/IO/FrameHeader.hpp"
 
 namespace wsac::io
 {
@@ -18,10 +17,11 @@ class FrameWriter
   public:
     explicit FrameWriter(PipeWriter &inner);
 
-    void WriteData(const model::Vector<uint8_t> &data) const;
+    void WriteData(model::Bytes data) const;
     void Write(const model::FrameHeader &header) const;
     void WriteCheckpoint() const;
     void WriteRegularHeader() const;
+    void WriteTestData(model::Bytes data) const;
 };
 
 } // namespace wsac::io

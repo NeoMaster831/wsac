@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Utils/Crypto/ChaCha.hpp"
+#include "Utils/Crypto/ChaCha.hpp"
 #include "Include.hpp"
 
 namespace wsac::run

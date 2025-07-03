@@ -35,11 +35,6 @@ class Host
         return *static_cast<T *>(_registered.at(typeid(T).name()).first);
     }
 
-    template <typename T> const T &Get() const
-    {
-        return *static_cast<T *>(_registered.at(typeid(T).name()).first);
-    }
-
     ~Host()
     {
         if (_disposed)

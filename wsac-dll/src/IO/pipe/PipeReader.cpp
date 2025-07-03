@@ -4,6 +4,8 @@
 
 #include "PipeReader.hpp"
 
+#include "Log.hpp"
+
 namespace wsac::io
 {
 
@@ -11,8 +13,9 @@ PipeReader::PipeReader(void *pipe) : _pipe(pipe)
 {
 }
 
-void PipeReader::Read(model::Vector<uint8_t> &v, const std::stop_token &st) const
+void PipeReader::Read(model::Bytes v, const std::stop_token &st) const
 {
+    LogVbLn("reading %zu bytes from pipe...", v.size());
     for (DWORD i = 0; i < v.size() && !st.stop_requested();)
     {
         bool waiting;
@@ -29,7 +32,7 @@ void PipeReader::Read(model::Vector<uint8_t> &v, const std::stop_token &st) cons
             throw StopTokenRequestedException();
 
         DWORD read;
-        if (!ReadFile(_pipe, v.data() + i, v.size() - i, &read, nullptr))
+        if (!ReadFile(_pipe, static_cast<uint8_t *>(v.data()) + i, v.size() - i, &read, nullptr))
             throw PipeReadException();
         if (read == 0)
             throw PipeReadException();
@@ -39,6 +42,7 @@ void PipeReader::Read(model::Vector<uint8_t> &v, const std::stop_token &st) cons
 
     if (st.stop_requested())
         throw StopTokenRequestedException();
+    LogVbLn("reading complete");
 }
 
-}
+} // namespace wsac::io

@@ -1,9 +1,6 @@
 #include "Comm.hpp"
 
-#include "Host.hpp"
 #include "Log.hpp"
-#include "Run/State.hpp"
-#include "Sec/PskManager.hpp"
 
 namespace
 {
@@ -11,24 +8,26 @@ const std::wstring PipeName = L"WsACPipe";
 
 HANDLE OpenPipe()
 {
+    LogLn("opening pipe..");
     const std::wstring pipeName = L"\\\\.\\pipe\\" + PipeName;
 
     void *pipe = CreateFileW(pipeName.c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
     if (pipe == INVALID_HANDLE_VALUE)
     {
         LogLn("Failed to connect to pipe, Error: %x", GetLastError());
-        // TODO : Use custom exception
-        throw std::exception();
+        throw wsac::io::PipeOpenFailedException();
     }
-
+    LogLn("pipe opened");
     return pipe;
 }
 
 void ClosePipe(void *pipe)
 {
+    LogLn("pipe closing..");
     if (!pipe)
         return;
     CloseHandle(pipe);
+    LogLn("pipe closed");
 }
 
 } // namespace

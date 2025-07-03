@@ -25,8 +25,8 @@ ChaCha20::~ChaCha20()
         UNREFERENCED_PARAMETER(BCryptCloseAlgorithmProvider(hAlg, 0));
 }
 
-void ChaCha20::SealBase(const Vector<uint8_t> &plain, const Nonce &nonce, const Vector<uint8_t> &authInfo, Mac &outMac,
-                        Vector<uint8_t> &outCipher) const
+void ChaCha20::SealBase(const ConstBytes plain, const Nonce &nonce, const ConstBytes authInfo, Mac &outMac,
+                        Bytes outCipher) const
 {
     if (outCipher.size() != plain.size())
         throw ArgumentException("lengths of ciphertext buffer and plaintext buffer must be matched");
@@ -36,59 +36,29 @@ void ChaCha20::SealBase(const Vector<uint8_t> &plain, const Nonce &nonce, const 
     BCRYPT_AUTHENTICATED_CIPHER_MODE_INFO info = {};
     BCRYPT_INIT_AUTH_MODE_INFO(info);
 
-    // Nonce should not null
     info.pbNonce = const_cast<PUCHAR>(nonce.data());
     info.cbNonce = nonce.size();
 
-    // Mac should not null, too.
     info.pbTag = outMac.data();
     info.cbTag = outMac.size();
 
-    if (!authInfo.size() == 0)
-    {
-        info.pbAuthData = const_cast<PUCHAR>(authInfo.data());
-        info.cbAuthData = authInfo.size();
-    }
-
-    PUCHAR pbInput;
-    size_t cbInput;
-    if (plain.size() == 0)
-    {
-        pbInput = nullptr;
-        cbInput = 0;
-    }
-    else
-    {
-        pbInput = const_cast<PUCHAR>(plain.data());
-        cbInput = plain.size();
-    }
-
-    PUCHAR pbOutput;
-    size_t cbOutput;
-    if (outCipher.size() == 0)
-    {
-        pbOutput = nullptr;
-        cbOutput = 0;
-    }
-    else
-    {
-        pbOutput = outCipher.data();
-        cbOutput = outCipher.size();
-    }
+    info.pbAuthData = (PUCHAR)authInfo.data();
+    info.cbAuthData = authInfo.size();
 
     ULONG outLen = 0;
-    st = BCryptEncrypt(hKey, pbInput, cbInput, &info, nullptr, 0, pbOutput, cbOutput, &outLen, 0);
+    st = BCryptEncrypt(hKey, (PUCHAR)plain.data(), plain.size(), &info, nullptr, 0,
+                       static_cast<uint8_t *>(outCipher.data()), outCipher.size(), &outLen, 0);
 
     if (!BCRYPT_SUCCESS(st) || outLen != plain.size())
         throw ChaChaException();
 }
 
-void ChaCha20::Seal(const Vector<uint8_t> &plain, const Nonce &nonce, Mac &outMac, Vector<uint8_t> &outCipher) const
+void ChaCha20::Seal(const ConstBytes plain, const Nonce &nonce, Mac &outMac, const Bytes outCipher) const
 {
     return SealBase(plain, nonce, {nullptr, 0}, outMac, outCipher);
 }
 
-void ChaCha20::Open(const Vector<uint8_t> &cipher, const Nonce &nonce, Mac &mac, Vector<uint8_t> &outPlain) const
+void ChaCha20::Open(const ConstBytes cipher, const Nonce &nonce, Mac &mac, Bytes outPlain) const
 {
     if (outPlain.size() != cipher.size())
         throw ArgumentException("lengths of ciphertext buffer and plaintext buffer must be matched");
@@ -105,15 +75,16 @@ void ChaCha20::Open(const Vector<uint8_t> &cipher, const Nonce &nonce, Mac &mac,
     info.cbTag = mac.size();
 
     ULONG outLen = 0;
-    st = BCryptDecrypt(hKey, const_cast<PUCHAR>(cipher.data()), cipher.size(), &info, nullptr, 0, outPlain.data(),
+    st = BCryptDecrypt(hKey, (PUCHAR)cipher.data(), cipher.size(), &info, nullptr, 0, (PUCHAR)outPlain.data(),
                        outPlain.size(), &outLen, 0);
     if (!BCRYPT_SUCCESS(st) || outLen != cipher.size())
         throw ChaChaException();
 }
 
-void ChaCha20::Sign(const Vector<uint8_t> &message, const Nonce &nonce, Mac &outMac) const
+void ChaCha20::Sign(const ConstBytes message, const Nonce &nonce, Mac &outMac) const
 {
-    Vector<uint8_t> buffer{nullptr, 0};
+    const Bytes buffer{nullptr, 0};
     SealBase(buffer, nonce, message, outMac, buffer);
 }
+
 } // namespace wsac::crypto

@@ -4,6 +4,8 @@
 
 #include "FrameReader.hpp"
 
+#include <Log.hpp>
+
 namespace wsac::io
 {
 
@@ -36,14 +38,17 @@ void FrameReader::ReadUntilPreamble(const std::stop_token &st) const
     size_t matched = 0;
     uint8_t b;
 
+    LogVbLn("reading preamble...");
     while (matched < kPreambleSize)
     {
         _inner.Read(b, st);
+        LogVbLn("Received byte: %d", b);
         while (matched && b != kPreamble[matched])
             matched = kLps[matched - 1];
         if (b == kPreamble[matched])
             ++matched;
     }
+    LogVbLn("done reading preamble");
 }
 
 model::FrameHeader FrameReader::ReadHeader(const std::stop_token &st) const
@@ -51,6 +56,11 @@ model::FrameHeader FrameReader::ReadHeader(const std::stop_token &st) const
     auto header = model::FrameHeader::Null();
     _inner.Read(header, st);
     return header;
+}
+
+void FrameReader::ReadUnsafeData(const model::Bytes buffer, const std::stop_token &st) const
+{
+    _inner.Read(buffer, st);
 }
 
 } // namespace wsac::io
