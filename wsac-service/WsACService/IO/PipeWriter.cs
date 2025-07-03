@@ -1,4 +1,5 @@
 using System.IO.Pipes;
+using System.Runtime.InteropServices;
 using WsACService.IO.Abstractions;
 
 namespace WsACService.IO;
@@ -10,6 +11,7 @@ public class PipeWriter(PipeStream pipe) : IWriter
         unsafe
         {
             Span<byte> buffer = stackalloc byte[sizeof(T)];
+            MemoryMarshal.Write(buffer, in value);
             pipe.Write(buffer);
         }
     }
