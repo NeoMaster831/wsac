@@ -1,10 +1,10 @@
 namespace WsACService.IO.Abstractions;
 
-public interface ILowLevelReader
+public interface IReader
 {
     public long Available { get; }
 
-    public ILowLevelReader CreateChild(long size);
+    public IReader CreateChild(long size);
     
     public Task ReadAsync(Stream stream, long size, CancellationToken ct);
     

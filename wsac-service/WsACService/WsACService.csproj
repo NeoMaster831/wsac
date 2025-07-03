@@ -21,9 +21,4 @@
     <ItemGroup>
         <ProjectReference Include="..\WsACService.Generator\WsACService.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="InProcess\Models\" />
-      <Folder Include="States\" />
-    </ItemGroup>
 </Project>

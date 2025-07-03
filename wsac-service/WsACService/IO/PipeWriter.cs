@@ -3,7 +3,7 @@ using WsACService.IO.Abstractions;
 
 namespace WsACService.IO;
 
-public class PipeLowLevelWriter(PipeStream pipe) : ILowLevelWriter
+public class PipeWriter(PipeStream pipe) : IWriter
 {
     public void Write<T>(T value) where T : unmanaged
     {

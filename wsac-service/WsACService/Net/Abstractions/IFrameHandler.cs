@@ -1,3 +1,4 @@
+using WsACService.IO;
 using WsACService.IO.Abstractions;
 using WsACService.Net.Models;
 
@@ -7,5 +8,5 @@ public interface IFrameHandler
 {
     public bool IsTarget(FrameSignature signature);
 
-    public Task HandleAsync(FrameSession session, FrameHeader header, ILowLevelReader body, CancellationToken ct);
+    public Task HandleAsync(FrameSession session, IReader body, FrameWriter writer, CancellationToken ct);
 }
