@@ -2,6 +2,8 @@ namespace WsACService.Logging;
 
 public class ConsoleLogger(string name) : ILogger
 {
+    private static readonly Lock Lock = new();
+    
     private Dictionary<LogLevel, ConsoleColor> ColorMap { get; } = new()
     {
         [LogLevel.Trace]       = ConsoleColor.Gray,
@@ -22,13 +24,15 @@ public class ConsoleLogger(string name) : ILogger
         if (!IsEnabled(logLevel))
             return;
 
-        var old = Console.ForegroundColor;
-        Console.ForegroundColor = ColorMap[logLevel];
+        lock (Lock)
+        {
+            var old = Console.ForegroundColor;
+            Console.ForegroundColor = ColorMap[logLevel];
 
-        Console.Write($"[{eventId.Id,2}: {logLevel,-12}]    {name} - {formatter(state, exception)}");
+            Console.Write($"[{eventId.Id,2}: {logLevel,-12}]    {name} - {formatter(state, exception)}");
 
-        Console.ForegroundColor = old;
-        Console.WriteLine();
+            Console.ForegroundColor = old;
+        }
     }
 
     public bool IsEnabled(LogLevel _) => true;

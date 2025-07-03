@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace WsACService.Net.Models;
 
@@ -15,10 +16,62 @@ public struct FrameHeader
     {
         Signature = signature;
         DataSize  = size;
-        Sign();
+
+        unsafe
+        {
+            fixed (byte* pNonce = Nonce)
+            {
+                var nonce = new Span<byte>(pNonce, 12);
+                RandomNumberGenerator.Fill(nonce);
+            }
+        }
+
+        SignUnsafe();
     }
 
-    private void Sign()
+    public override string ToString()
+    {
+        static void AppendHex(StringBuilder builder, Span<byte> bytes)
+        {
+            for (var i = 0; i < bytes.Length; ++i)
+            {
+                if (i != 0)
+                    builder.Append(':');
+                builder.Append(bytes[i].ToString("X2"));
+            }
+        }
+
+        var builder = new StringBuilder()
+            .Append("Frame{ ")
+            .Append("Signature = ").Append(Signature.ToString()).Append(", ")
+            .Append("DataSize = ").Append(DataSize).Append(", ");
+
+        builder.Append("Nonce = ");
+        unsafe
+        {
+            fixed (byte* pNonce = Nonce)
+            {
+                var nonce = new Span<byte>(pNonce, 12);
+                AppendHex(builder, nonce);
+            }
+        }
+
+        builder.Append(", MAC = ");
+        unsafe
+        {
+            fixed (byte* pMAC = MAC)
+            {
+                var mac = new Span<byte>(pMAC, 16);
+                AppendHex(builder, mac);
+            }
+        }
+
+        builder.Append('}');
+
+        return builder.ToString();
+    }
+
+    private void SignUnsafe()
     {
         Span<byte> buffer = stackalloc byte[10];
         MemoryMarshal.Write(buffer.Slice(0, 2), in Signature);
@@ -33,30 +86,29 @@ public struct FrameHeader
                 var mac   = new Span<byte>(pMAC, 16);
 
                 using var cipher = new ChaCha20Poly1305(Config.PSK[0]);
-                RandomNumberGenerator.Fill(nonce);
-
                 cipher.Encrypt(nonce, ReadOnlySpan<byte>.Empty, Span<byte>.Empty, mac, buffer);
             }
         }
+    }
+
+    public FrameHeader Sign()
+    {
+        var copy = this;
+        copy.SignUnsafe();
+        return copy;
     }
 
     public bool Validate()
     {
         unsafe
         {
-            var signed = this;
-            signed.Sign();
-
-            fixed (byte* pNonce = Nonce)
+            var signed = Sign();
             fixed (byte* pMAC = MAC)
             {
-                var nonce  = new Span<byte>(pNonce, 12);
-                var oNonce = new Span<byte>(signed.Nonce, 12);
-
                 var mac  = new Span<byte>(pMAC, 16);
                 var oMAC = new Span<byte>(signed.MAC, 12);
 
-                return nonce.SequenceEqual(oNonce) && mac.SequenceEqual(oMAC);
+                return mac.SequenceEqual(oMAC);
             }
         }
     }
