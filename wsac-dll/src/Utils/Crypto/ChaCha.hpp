@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../Model/Bytes.hpp"
+#include "Model/Bytes.hpp"
 #include "Include.hpp"
 
 namespace wsac::crypto

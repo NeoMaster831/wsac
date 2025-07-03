@@ -4,8 +4,8 @@
 
 #pragma once
 
+#include "IO/pipe/PipeWriter.hpp"
 #include "Model/FrameHeader.hpp"
-#include "PipeWriter.hpp"
 
 namespace wsac::io
 {

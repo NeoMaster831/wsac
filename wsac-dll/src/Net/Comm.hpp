@@ -1,7 +1,7 @@
 #pragma once
 
-#include "IO/PipeReader.hpp"
-#include "IO/PipeWriter.hpp"
+#include "IO/pipe/PipeReader.hpp"
+#include "IO/pipe/PipeWriter.hpp"
 #include "Include.hpp"
 
 namespace wsac::net

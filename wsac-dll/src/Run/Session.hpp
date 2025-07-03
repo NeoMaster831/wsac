@@ -1,7 +1,7 @@
 #pragma once
 
-#include "IO/FrameReader.hpp"
-#include "IO/FrameWriter.hpp"
+#include "IO/frame/FrameReader.hpp"
+#include "IO/frame/FrameWriter.hpp"
 #include "Include.hpp"
 
 namespace wsac::run
