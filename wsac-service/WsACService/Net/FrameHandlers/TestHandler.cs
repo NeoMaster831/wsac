@@ -1,3 +1,4 @@
+using WsACService.IO;
 using WsACService.IO.Abstractions;
 using WsACService.Net.Abstractions;
 using WsACService.Net.Models;
@@ -9,7 +10,7 @@ public class TestHandler : IFrameHandler
 {
     public bool IsTarget(FrameSignature signature) => signature is FrameSignature.Test;
 
-    public async Task HandleAsync(FrameSession session, IReader body, CancellationToken ct)
+    public async Task HandleAsync(FrameSession session, IReader body, FrameWriter writer, CancellationToken ct)
     {
         var size = body.Available;
         await body.SkipAsync(size, ct);

@@ -8,8 +8,9 @@ namespace WsACService.Net;
 
 public class FrameSession(ILogger logger, SessionState state, IWriter writer, IReader reader)
 {
-    public SessionState State       { get; } = state;
-    public FrameWriter  FrameWriter { get; } = new(writer);
+    public  SessionState State       { get; } = state;
+    
+    private FrameWriter  FrameWriter { get; } = new(writer);
 
     public async Task RunAsync(CancellationToken ct)
     {
@@ -53,7 +54,7 @@ public class FrameSession(ILogger logger, SessionState state, IWriter writer, IR
             return;
         }
 
-        await handler.HandleAsync(this, body, ct);
+        await handler.HandleAsync(this, body, FrameWriter, ct);
 
         if (body.Available != 0)
         {
@@ -90,15 +91,10 @@ public class FrameSession(ILogger logger, SessionState state, IWriter writer, IR
         logger.LogInformation("session closed successfully");
     }
 
-    public void SendCheckpoint()
+    private void RequestCheckpoint()
     {
         var frame = new FrameHeader(FrameSignature.Checkpoint);
         FrameWriter.Write(frame);
-    }
-
-    private void RequestCheckpoint()
-    {
-        SendCheckpoint();
         State.FrameSessionState = FrameSessionState.None;
     }
 
