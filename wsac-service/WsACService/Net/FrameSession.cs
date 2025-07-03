@@ -8,9 +8,9 @@ namespace WsACService.Net;
 
 public class FrameSession(ILogger logger, SessionState state, IWriter writer, IReader reader)
 {
-    public  SessionState State       { get; } = state;
-    
-    private FrameWriter  FrameWriter { get; } = new(writer);
+    public SessionState State { get; } = state;
+
+    private FrameWriter FrameWriter { get; } = new(writer);
 
     public async Task RunAsync(CancellationToken ct)
     {
@@ -85,7 +85,7 @@ public class FrameSession(ILogger logger, SessionState state, IWriter writer, IR
                 logger.LogWarning("broken preamble");
                 continue;
             }
-            
+
             logger.LogDebug("preamble received");
 
             if (!ReadHeader(out var header, ct))
@@ -95,7 +95,7 @@ public class FrameSession(ILogger logger, SessionState state, IWriter writer, IR
                 RequestCheckpoint();
                 continue;
             }
-            
+
             logger.LogDebug("header received (sig: {sig}, size: {siz})", header.Signature, header.DataSize);
 
             var bodyReader = reader.CreateChild(header.DataSize);
