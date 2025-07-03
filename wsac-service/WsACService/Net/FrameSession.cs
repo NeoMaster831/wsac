@@ -6,8 +6,7 @@ namespace WsACService.Net;
 
 public class FrameSession(ILogger logger, SessionState state, IWriter writer, IReader reader)
 {
-    public ILogger      Logger { get; } = logger;
-    public SessionState State  { get; } = state;
+    public SessionState State { get; } = state;
 
     public async Task RunAsync(CancellationToken ct)
     {
@@ -17,11 +16,11 @@ public class FrameSession(ILogger logger, SessionState state, IWriter writer, IR
         }
         catch (EndOfStreamException)
         {
-            Logger.LogError("unexpected EOF");
+            logger.LogError("unexpected EOF");
         }
         catch (OperationCanceledException)
         {
-            Logger.LogError("operation cancelled");
+            logger.LogError("operation cancelled");
         }
     }
 
@@ -31,14 +30,14 @@ public class FrameSession(ILogger logger, SessionState state, IWriter writer, IR
         if (handler is null)
         {
             // TODO : make event
-            Logger.LogWarning("unhandled frame (signature: 0x{:X})", header.Signature);
+            logger.LogWarning("unhandled frame (signature: 0x{:X})", header.Signature);
             await body.SkipAsync(header.DataSize, ct);
             return;
         }
 
         if (State.FrameSessionState == FrameSessionState.NONE && handler is not CheckpointHandler)
         {
-            Logger.LogWarning("regular data on NONE state; skipping...");
+            logger.LogWarning("regular data on NONE state; skipping...");
             await body.SkipAsync(header.DataSize, ct);
             return;
         }
@@ -48,7 +47,7 @@ public class FrameSession(ILogger logger, SessionState state, IWriter writer, IR
         if (body.Available != 0)
         {
             // TODO : make event
-            Logger.LogWarning("handler only consumes partial body");
+            logger.LogWarning("handler only consumes partial body");
             await body.SkipAsync(body.Available, ct);
         }
     }
@@ -62,7 +61,7 @@ public class FrameSession(ILogger logger, SessionState state, IWriter writer, IR
             if (!ReceivePreamble(preamble, ct))
             {
                 // TODO : make event
-                Logger.LogWarning("broken preamble");
+                logger.LogWarning("broken preamble");
                 continue;
             }
 
@@ -77,7 +76,7 @@ public class FrameSession(ILogger logger, SessionState state, IWriter writer, IR
             await HandleFrameAsync(header, bodyReader, ct);
         }
 
-        Logger.LogInformation("session closed successfully");
+        logger.LogInformation("session closed successfully");
     }
 
     public void SendCheckpoint()
