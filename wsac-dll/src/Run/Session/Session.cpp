@@ -50,7 +50,7 @@ void Session::HandleTestSignal(const size_t dataSize, const std::stop_token &tok
     _frameReader.ReadUnsafeData(buffer, token);
     Log("received data: {");
     for (size_t i = 0; i < dataSize; i++)
-        Log("%d", buffer[i]);
+        Log("%d, ", buffer[i]);
     LogLn("}");
 }
 
@@ -63,7 +63,7 @@ void Session::Run(const std::stop_token &token) const
     LogLn("session started");
 
     // Write Test Data
-    _frameWriter.WriteTestData(std::string("Echo"));
+    // _frameWriter.WriteTestData(std::string("Echo"));
 
     while (!token.stop_requested())
     {

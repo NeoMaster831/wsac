@@ -42,6 +42,7 @@ void FrameReader::ReadUntilPreamble(const std::stop_token &st) const
     while (matched < kPreambleSize)
     {
         _inner.Read(b, st);
+        LogVbLn("Received byte: %d", b);
         while (matched && b != kPreamble[matched])
             matched = kLps[matched - 1];
         if (b == kPreamble[matched])
