@@ -2,6 +2,6 @@ namespace WsACService;
 
 public static class Consts
 {
-    public const string PipeName        = "WsACService";
-    public const ushort NumThread       = 4;
+    public const string PipeName  = "WsACPipe";
+    public const ushort NumThread = 4;
 }
