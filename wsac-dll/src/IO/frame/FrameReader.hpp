@@ -17,6 +17,7 @@ class FrameReader
 
     void ReadUntilPreamble(const std::stop_token &st) const;
     [[nodiscard]] model::FrameHeader ReadHeader(const std::stop_token &st) const;
+    void ReadUnsafeData(model::Bytes buffer, const std::stop_token &st) const;
 };
 
 } // namespace wsac::io

@@ -13,9 +13,9 @@ class Session
     io::FrameWriter _frameWriter;
 
     void HandleCheckpointSignal() const;
-    static void HandleRegularSignal();
+    static void HandleRegularSignal(size_t dataSize, const std::stop_token &token);
     void HandleInvalidSignal() const;
-    static void HandleTestSignal();
+    void HandleTestSignal(size_t dataSize, const std::stop_token &token) const;
 
   public:
     explicit Session(io::PipeReader &reader, io::PipeWriter &writer);

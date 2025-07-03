@@ -25,9 +25,9 @@ void Session::HandleCheckpointSignal() const
     }
 }
 
-void Session::HandleRegularSignal()
+void Session::HandleRegularSignal(const size_t dataSize, const std::stop_token &token)
 {
-    LogLn("regular signal received");
+    LogLn("regular signal received, data size: %zu", dataSize);
     // TODO: call singleton
 }
 
@@ -37,13 +37,21 @@ void Session::HandleInvalidSignal() const
 
     // TODO: Report
 
+    LogLn("writing checkpoint...");
+
     // We have to recover. So we write checkpoint.
     _frameWriter.WriteCheckpoint();
 }
 
-void Session::HandleTestSignal()
+void Session::HandleTestSignal(const size_t dataSize, const std::stop_token &token) const
 {
-    LogLn("test signal received!");
+    LogLn("test signal received, data size: %zu", dataSize);
+    std::vector<uint8_t> buffer(dataSize);
+    _frameReader.ReadUnsafeData(buffer, token);
+    Log("received data: {");
+    for (size_t i = 0; i < dataSize; i++)
+        Log("%d", buffer[i]);
+    LogLn("}");
 }
 
 Session::Session(io::PipeReader &reader, io::PipeWriter &writer) : _frameReader(reader), _frameWriter(writer)
@@ -77,10 +85,10 @@ void Session::Run(const std::stop_token &token) const
             HandleCheckpointSignal();
             break;
         case model::Regular:
-            HandleRegularSignal();
+            HandleRegularSignal(header.dataSize, token);
             break;
         case model::Test:
-            HandleTestSignal();
+            HandleTestSignal(header.dataSize, token);
             break;
         default:
             HandleInvalidSignal();

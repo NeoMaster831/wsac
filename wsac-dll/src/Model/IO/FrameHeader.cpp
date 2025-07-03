@@ -14,6 +14,7 @@ namespace wsac::model
 
 FrameHeader::FrameHeader(const FrameSig sig, const uint64_t size) : sig(sig), dataSize(size)
 {
+    crypto::Random::Fill(nonce);
     Sign();
 }
 
@@ -26,10 +27,7 @@ bool FrameHeader::Validate() const
 
 void FrameHeader::Sign()
 {
-    crypto::Random::Fill(nonce);
-
     const Bytes ref{reinterpret_cast<uint8_t *>(this), sizeof sig + sizeof dataSize};
-
     const auto &cipher = Host::Current().Get<run::State>().Layer1PskEncryptor;
     cipher.Sign(ref, nonce, mac);
 }

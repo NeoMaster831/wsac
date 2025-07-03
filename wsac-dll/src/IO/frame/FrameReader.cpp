@@ -57,4 +57,9 @@ model::FrameHeader FrameReader::ReadHeader(const std::stop_token &st) const
     return header;
 }
 
+void FrameReader::ReadUnsafeData(const model::Bytes buffer, const std::stop_token &st) const
+{
+    _inner.Read(buffer, st);
+}
+
 } // namespace wsac::io
