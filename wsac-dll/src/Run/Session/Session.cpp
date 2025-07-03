@@ -55,8 +55,7 @@ void Session::Run(const std::stop_token &token) const
     LogLn("session started");
 
     // Write Test Data
-    constexpr auto testDataBody = (char *)"Echo";
-    _frameWriter.WriteTestData(testDataBody);
+    _frameWriter.WriteTestData(std::string("Echo"));
 
     while (!token.stop_requested())
     {

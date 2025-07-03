@@ -8,6 +8,7 @@ const std::wstring PipeName = L"WsACPipe";
 
 HANDLE OpenPipe()
 {
+    LogLn("opening pipe..");
     const std::wstring pipeName = L"\\\\.\\pipe\\" + PipeName;
 
     void *pipe = CreateFileW(pipeName.c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
@@ -16,15 +17,17 @@ HANDLE OpenPipe()
         LogLn("Failed to connect to pipe, Error: %x", GetLastError());
         throw wsac::io::PipeOpenFailedException();
     }
-
+    LogLn("pipe opened");
     return pipe;
 }
 
 void ClosePipe(void *pipe)
 {
+    LogLn("pipe closing..");
     if (!pipe)
         return;
     CloseHandle(pipe);
+    LogLn("pipe closed");
 }
 
 } // namespace

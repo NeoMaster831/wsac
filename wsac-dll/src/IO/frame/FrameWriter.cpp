@@ -4,6 +4,8 @@
 
 #include "FrameWriter.hpp"
 
+#include "Log.hpp"
+
 namespace wsac::io
 {
 
