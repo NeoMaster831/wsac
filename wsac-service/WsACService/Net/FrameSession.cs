@@ -76,16 +76,22 @@ public class FrameSession(ILogger logger, SessionState state, IWriter writer, IR
     private async Task RunAsyncInternal(CancellationToken ct)
     {
         var preamble = new Preamble();
-
+        
+        using var stream = new MemoryStream();
+        stream.Write("hello from service"u8);
+        FrameWriter.Write(new FrameHeader(FrameSignature.Test, stream.Length));
+        await FrameWriter.WriteAsync(stream, ct);
+        
         while (!ct.IsCancellationRequested)
         {
-            if (!ReceivePreamble(ref preamble, ct))
+            var foundPreamble = false;
+            for (var i = 0; i < Preamble.Size; ++i)
+                foundPreamble |= ReceivePreamble(ref preamble, ct);
+
+            if (!foundPreamble)
             {
                 // TODO : make event
-                logger.LogWarning("broken preamble");
-                
-                logger.LogDebug("received: {}", preamble);
-                logger.LogDebug("expected: {}", Config.Preamble);
+                logger.LogWarning("received preamble {A} differs to {B}", preamble, Config.Preamble);
                 continue;
             }
 
@@ -95,10 +101,10 @@ public class FrameSession(ILogger logger, SessionState state, IWriter writer, IR
             {
                 // TODO : make event
                 logger.LogError("broken header integrity; requesting checkpoint...");
-                
+
                 logger.LogDebug("received:\n{}", header);
                 logger.LogDebug("expected:\n{}", header.Sign());
-                
+
                 RequestCheckpoint();
                 continue;
             }
