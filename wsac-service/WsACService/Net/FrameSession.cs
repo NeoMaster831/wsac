@@ -14,6 +14,7 @@ public class FrameSession(ILogger logger, SessionState state, IWriter writer, IR
 
     public async Task RunAsync(CancellationToken ct)
     {
+        logger.LogInformation("starting session");
         try
         {
             await RunAsyncInternal(ct);
@@ -22,9 +23,17 @@ public class FrameSession(ILogger logger, SessionState state, IWriter writer, IR
         {
             logger.LogError("unexpected EOF");
         }
+        catch (IOException e)
+        {
+            logger.LogError("connection refused by peer: {}", e.Message);
+        }
         catch (OperationCanceledException)
         {
             logger.LogError("operation cancelled");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "unhandled exception");
         }
     }
 
@@ -76,13 +85,18 @@ public class FrameSession(ILogger logger, SessionState state, IWriter writer, IR
                 logger.LogWarning("broken preamble");
                 continue;
             }
+            
+            logger.LogDebug("preamble received");
 
             if (!ReadHeader(out var header, ct))
             {
                 // TODO : make event
+                logger.LogError("broken header integrity; requesting checkpoint...");
                 RequestCheckpoint();
                 continue;
             }
+            
+            logger.LogDebug("header received (sig: {sig}, size: {siz})", header.Signature, header.DataSize);
 
             var bodyReader = reader.CreateChild(header.DataSize);
             await HandleFrameAsync(header, bodyReader, ct);

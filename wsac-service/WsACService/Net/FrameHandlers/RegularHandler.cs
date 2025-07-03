@@ -13,6 +13,6 @@ public class RegularHandler : IFrameHandler
     public async Task HandleAsync(FrameSession session, IReader body, FrameWriter writer, CancellationToken ct)
     {
         var logger = session.State.CreateLogger(nameof(PacketSession));
-        await new PacketSession(logger, session.State, body, writer).HandleAsync(body, ct);
+        await new PacketSession(logger, session.State, body, writer).HandleAsync(ct);
     }
 }

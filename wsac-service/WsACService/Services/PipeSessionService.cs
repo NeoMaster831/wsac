@@ -12,12 +12,8 @@ public sealed class PipeSessionService : IHostedService, IDisposable
     private readonly CancellationTokenSource _cts = new();
     private readonly Thread[]                _threads;
 
-    private readonly ILogger _logger;
-
-    public PipeSessionService(ILogger<PipeSessionService> logger)
+    public PipeSessionService()
     {
-        _logger = logger;
-
         _threads = new Thread[Consts.NumThread];
         for (var i = 0; i < Consts.NumThread; i++)
         {
@@ -34,16 +30,35 @@ public sealed class PipeSessionService : IHostedService, IDisposable
         var reader = new PipeReader(pipe);
         var writer = new PipeWriter(pipe);
 
+        var thread = Environment.CurrentManagedThreadId;
+        var logger = ConsoleLoggerProvider.Instance.CreateLogger($"PipeSessionService:{thread}");
+
         while (!ct.IsCancellationRequested)
         {
-            pipe.WaitForConnection();
+            logger.LogInformation("waiting for connection...");
 
-            var id     = Interlocked.Increment(ref _sessionId);
-            var logger = ConsoleLoggerProvider.Instance.CreateLogger($"{nameof(FrameSession)}:{id}");
-            var state  = new SessionState(id);
-            var task   = new FrameSession(logger, state, writer, reader).RunAsync(ct);
+            try
+            {
+                pipe.WaitForConnectionAsync(ct)
+                    .GetAwaiter()
+                    .GetResult();
+            }
+            catch (OperationCanceledException)
+            {
+                logger.LogInformation("waiting canceled; exiting...");
+                break;
+            }
+
+            logger.LogInformation("pipe connection established");
+
+            var id            = Interlocked.Increment(ref _sessionId);
+            var sessionLogger = ConsoleLoggerProvider.Instance.CreateLogger($"{nameof(FrameSession)}:{id}");
+            var state         = new SessionState(id);
+            var task          = new FrameSession(sessionLogger, state, writer, reader).RunAsync(ct);
 
             task.GetAwaiter().GetResult();
+
+            logger.LogInformation("pipe connection closed");
         }
     }
 
