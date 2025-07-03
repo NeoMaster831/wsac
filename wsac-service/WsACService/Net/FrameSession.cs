@@ -83,6 +83,9 @@ public class FrameSession(ILogger logger, SessionState state, IWriter writer, IR
             {
                 // TODO : make event
                 logger.LogWarning("broken preamble");
+                
+                logger.LogDebug("received: {}", preamble);
+                logger.LogDebug("expected: {}", Config.Preamble);
                 continue;
             }
 
@@ -90,11 +93,12 @@ public class FrameSession(ILogger logger, SessionState state, IWriter writer, IR
 
             if (!ReadHeader(out var header, ct))
             {
+                // TODO : make event
+                logger.LogError("broken header integrity; requesting checkpoint...");
+                
                 logger.LogDebug("received:\n{}", header);
                 logger.LogDebug("expected:\n{}", header.Sign());
                 
-                // TODO : make event
-                logger.LogError("broken header integrity; requesting checkpoint...");
                 RequestCheckpoint();
                 continue;
             }

@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace WsACService.Net.Models;
 
@@ -49,4 +50,19 @@ public struct Preamble : IEquatable<Preamble>
     public static bool operator !=(Preamble left, Preamble right) => !(left == right);
 
     public override int GetHashCode() => High ^ Low;
+    
+    public override string ToString()
+    {
+        unsafe
+        {
+            var builder = new StringBuilder();
+            for (var i = 0; i < Size; i++)
+            {
+                if (i != 0)
+                    builder.Append(':');
+                builder.Append(Data[i].ToString("X2"));
+            }
+            return builder.ToString();
+        }
+    }
 }
