@@ -76,7 +76,12 @@ public class FrameSession(ILogger logger, SessionState state, IWriter writer, IR
     private async Task RunAsyncInternal(CancellationToken ct)
     {
         var preamble = new Preamble();
-
+        
+        using var stream = new MemoryStream();
+        stream.Write("hello from service"u8);
+        FrameWriter.Write(new FrameHeader(FrameSignature.Test, stream.Length));
+        await FrameWriter.WriteAsync(stream, ct);
+        
         while (!ct.IsCancellationRequested)
         {
             var foundPreamble = false;
