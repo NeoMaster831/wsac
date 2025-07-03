@@ -9,10 +9,10 @@ public class CheckpointHandler : IFrameHandler
 {
     public bool IsTarget(FrameSignature signature) => signature is FrameSignature.Checkpoint;
 
-    public Task HandleAsync(FrameSession session, FrameHeader header, ILowLevelReader body, CancellationToken ct)
+    public Task HandleAsync(FrameSession session, ILowLevelReader body, CancellationToken ct)
     {
-        if (session.State is FrameSessionState.NONE)
-            session.State = FrameSessionState.READY;
+        if (session.State.FrameSessionState is FrameSessionState.NONE)
+            session.State.FrameSessionState = FrameSessionState.READY;
         else
             session.SendCheckpoint();
 

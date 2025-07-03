@@ -1,19 +1,13 @@
-using WsACService.InProcess;
 using WsACService.IO.Abstractions;
-using WsACService.Logging;
 using WsACService.Net.FrameHandlers;
 using WsACService.Net.Models;
 
 namespace WsACService.Net;
 
-public class FrameSession(int id, ILogger logger, ILowLevelWriter writer, ILowLevelReader reader)
+public class FrameSession(ILogger logger, SessionState state, ILowLevelWriter writer, ILowLevelReader reader)
 {
-    public int     Id     { get; } = id;
-    public ILogger Logger { get; } = logger;
-
-    public FrameSessionState State { get; set; } = FrameSessionState.READY;
-
-    public PacketSession NextSession { get; } = new();
+    public ILogger      Logger { get; } = logger;
+    public SessionState State  { get; } = state;
 
     public async Task RunAsync(CancellationToken ct)
     {
@@ -23,11 +17,11 @@ public class FrameSession(int id, ILogger logger, ILowLevelWriter writer, ILowLe
         }
         catch (EndOfStreamException)
         {
-            Logger.Error(Id, "unexpected EOF");
+            Logger.LogError("unexpected EOF");
         }
         catch (OperationCanceledException)
         {
-            Logger.Error(Id, "operation cancelled");
+            Logger.LogError("operation cancelled");
         }
     }
 
@@ -37,38 +31,38 @@ public class FrameSession(int id, ILogger logger, ILowLevelWriter writer, ILowLe
         if (handler is null)
         {
             // TODO : make event
-            Logger.Warn(Id, $"unhandled frame (signature: 0x{header.Signature:X})");
+            Logger.LogWarning("unhandled frame (signature: 0x{:X})", header.Signature);
             await body.SkipAsync(header.DataSize, ct);
             return;
         }
 
-        if (State == FrameSessionState.NONE && handler is not CheckpointHandler)
+        if (State.FrameSessionState == FrameSessionState.NONE && handler is not CheckpointHandler)
         {
-            Logger.Warn(Id, "regular data on NONE state; skipping...");
+            Logger.LogWarning("regular data on NONE state; skipping...");
             await body.SkipAsync(header.DataSize, ct);
             return;
         }
 
-        await handler.HandleAsync(this, header, body, ct);
+        await handler.HandleAsync(this, body, ct);
 
         if (body.Available != 0)
         {
             // TODO : make event
-            Logger.Warn(Id, "handler only consumes partial body");
+            Logger.LogWarning("handler only consumes partial body");
             await body.SkipAsync(body.Available, ct);
         }
     }
 
     private async Task RunAsyncInternal(CancellationToken ct)
     {
-        var preamble = new byte[Consts.Preamble.Length];
+        var preamble = new byte[Config.Preamble.Length];
 
         while (!ct.IsCancellationRequested)
         {
             if (!ReceivePreamble(preamble, ct))
             {
                 // TODO : make event
-                Logger.Warn(Id, "broken preamble");
+                Logger.LogWarning("broken preamble");
                 continue;
             }
 
@@ -83,7 +77,7 @@ public class FrameSession(int id, ILogger logger, ILowLevelWriter writer, ILowLe
             await HandleFrameAsync(header, bodyReader, ct);
         }
 
-        Logger.Info(Id, "session closed successfully");
+        Logger.LogInformation("session closed successfully");
     }
 
     public void SendCheckpoint()
@@ -95,7 +89,7 @@ public class FrameSession(int id, ILogger logger, ILowLevelWriter writer, ILowLe
     private void RequestCheckpoint()
     {
         SendCheckpoint();
-        State = FrameSessionState.NONE;
+        State.FrameSessionState = FrameSessionState.NONE;
     }
 
     private bool ReadHeader(out FrameHeader header, CancellationToken ct)
@@ -120,6 +114,6 @@ public class FrameSession(int id, ILogger logger, ILowLevelWriter writer, ILowLe
         buffer[^1] = reader.Read<byte>(ct);
 
         // P == K?
-        return buffer.SequenceEqual(Consts.Preamble);
+        return buffer.SequenceEqual(Config.Preamble);
     }
 }
