@@ -77,13 +77,6 @@ public class FrameSession(ILogger logger, SessionState state, IWriter writer, IR
     {
         var preamble = new Preamble();
         
-        logger.LogInformation("sending test frame...");
-        using var stream = new MemoryStream();
-        stream.Write("hello from service"u8);
-        FrameWriter.Write(new FrameHeader(FrameSignature.Test, stream.Length));
-        await FrameWriter.WriteAsync(stream, ct);
-        logger.LogInformation("test frame sent");
-        
         while (!ct.IsCancellationRequested)
         {
             var foundPreamble = false;
