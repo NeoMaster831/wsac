@@ -6,7 +6,7 @@ namespace WsACService.IO;
 
 public class PipeReader : IReader
 {
-    private readonly PipeStream          _pipe;
+    private readonly PipeStream  _pipe;
     private readonly PipeReader? _parent;
 
     public PipeReader(PipeStream pipe)
