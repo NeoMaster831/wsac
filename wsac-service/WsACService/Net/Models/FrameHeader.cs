@@ -11,7 +11,7 @@ public struct FrameHeader
     public unsafe fixed byte           Nonce[12];
     public unsafe fixed byte           MAC[16];
 
-    public FrameHeader(FrameSignature signature, long size)
+    public FrameHeader(FrameSignature signature, long size = 0)
     {
         Signature = signature;
         DataSize  = size;
@@ -32,7 +32,7 @@ public struct FrameHeader
                 var nonce = new Span<byte>(pNonce, 12);
                 var mac   = new Span<byte>(pMAC, 16);
 
-                using var cipher = new ChaCha20Poly1305(Consts.InterProcessPSK);
+                using var cipher = new ChaCha20Poly1305(Config.PSK[0]);
                 RandomNumberGenerator.Fill(nonce);
 
                 cipher.Encrypt(nonce, ReadOnlySpan<byte>.Empty, Span<byte>.Empty, mac, buffer);

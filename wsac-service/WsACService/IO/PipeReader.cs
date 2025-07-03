@@ -4,18 +4,18 @@ using WsACService.IO.Abstractions;
 
 namespace WsACService.IO;
 
-public class PipeLowLevelReader : ILowLevelReader
+public class PipeReader : IReader
 {
     private readonly PipeStream          _pipe;
-    private readonly PipeLowLevelReader? _parent;
+    private readonly PipeReader? _parent;
 
-    public PipeLowLevelReader(PipeStream pipe)
+    public PipeReader(PipeStream pipe)
     {
         _pipe     = pipe;
         Available = long.MaxValue;
     }
 
-    private PipeLowLevelReader(PipeLowLevelReader parent)
+    private PipeReader(PipeReader parent)
     {
         _pipe     = parent._pipe;
         _parent   = parent;
@@ -50,12 +50,12 @@ public class PipeLowLevelReader : ILowLevelReader
             throw new ApplicationException("Read operation exceeds available bytes count");
     }
 
-    public ILowLevelReader CreateChild(long size)
+    public IReader CreateChild(long size)
     {
         if (Available < size)
             throw new ArgumentOutOfRangeException(nameof(size), "CreateChild operation exceeds available bytes count");
 
-        var t = new PipeLowLevelReader(this)
+        var t = new PipeReader(this)
         {
             Available = size
         };

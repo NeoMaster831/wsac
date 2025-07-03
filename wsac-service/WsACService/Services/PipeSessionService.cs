@@ -1,5 +1,6 @@
 using System.IO.Pipes;
 using WsACService.IO;
+using WsACService.Logging;
 using WsACService.Net;
 
 namespace WsACService.Services;
@@ -7,11 +8,11 @@ namespace WsACService.Services;
 public sealed class PipeSessionService : IHostedService, IDisposable
 {
     private static int _sessionId;
-    
+
     private readonly CancellationTokenSource _cts = new();
     private readonly Thread[]                _threads;
 
-    private readonly ILogger    _logger;
+    private readonly ILogger _logger;
 
     public PipeSessionService(ILogger<PipeSessionService> logger)
     {
@@ -30,16 +31,18 @@ public sealed class PipeSessionService : IHostedService, IDisposable
 
         using var pipe = new NamedPipeServerStream(Consts.PipeName, PipeDirection.InOut, Consts.NumThread);
 
-        var reader = new PipeLowLevelReader(pipe);
-        var writer = new PipeLowLevelWriter(pipe);
-        
+        var reader = new PipeReader(pipe);
+        var writer = new PipeWriter(pipe);
+
         while (!ct.IsCancellationRequested)
         {
             pipe.WaitForConnection();
-            
-            var id = Interlocked.Increment(ref _sessionId);
-            var task = new FrameSession(id, _logger, writer, reader).RunAsync(ct);
-            
+
+            var id     = Interlocked.Increment(ref _sessionId);
+            var logger = ConsoleLoggerProvider.Instance.CreateLogger($"{nameof(FrameSession)}:{id}");
+            var state  = new SessionState(id);
+            var task   = new FrameSession(logger, state, writer, reader).RunAsync(ct);
+
             task.GetAwaiter().GetResult();
         }
     }
@@ -57,7 +60,7 @@ public sealed class PipeSessionService : IHostedService, IDisposable
     public Task StopAsync(CancellationToken ct)
     {
         _cts.Cancel();
-        
+
         for (var i = 0; i < Consts.NumThread; i++)
         {
             _threads[i].Join();
