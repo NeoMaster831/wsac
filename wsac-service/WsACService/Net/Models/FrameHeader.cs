@@ -106,7 +106,7 @@ public struct FrameHeader
             fixed (byte* pMAC = MAC)
             {
                 var mac  = new Span<byte>(pMAC, 16);
-                var oMAC = new Span<byte>(signed.MAC, 12);
+                var oMAC = new Span<byte>(signed.MAC, 16);
 
                 return mac.SequenceEqual(oMAC);
             }
