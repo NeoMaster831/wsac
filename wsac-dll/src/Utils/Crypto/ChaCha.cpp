@@ -53,12 +53,12 @@ void ChaCha20::SealBase(const ConstBytes plain, const Nonce &nonce, const ConstB
         throw ChaChaException();
 }
 
-void ChaCha20::Seal(ConstBytes plain, const Nonce &nonce, Mac &outMac, Bytes outCipher) const
+void ChaCha20::Seal(const ConstBytes plain, const Nonce &nonce, Mac &outMac, const Bytes outCipher) const
 {
     return SealBase(plain, nonce, {nullptr, 0}, outMac, outCipher);
 }
 
-void ChaCha20::Open(ConstBytes cipher, const Nonce &nonce, Mac &mac, Bytes outPlain) const
+void ChaCha20::Open(const ConstBytes cipher, const Nonce &nonce, Mac &mac, Bytes outPlain) const
 {
     if (outPlain.size() != cipher.size())
         throw ArgumentException("lengths of ciphertext buffer and plaintext buffer must be matched");

@@ -29,6 +29,7 @@ void Session::HandleCheckpointSignal() const
 void Session::HandleRegularSignal()
 {
     LogLn("regular signal received");
+    // TODO: call singleton
 }
 
 void Session::HandleInvalidSignal() const
@@ -41,11 +42,16 @@ void Session::HandleInvalidSignal() const
     _frameWriter.WriteCheckpoint();
 }
 
+void Session::HandleTestSignal()
+{
+    LogLn("test signal received!");
+}
+
 Session::Session(io::PipeReader &reader, io::PipeWriter &writer) : _frameReader(reader), _frameWriter(writer)
 {
 }
 
-void Session::Run(const std::stop_token &token)
+void Session::Run(const std::stop_token &token) const
 {
     LogLn("session started");
 
@@ -70,6 +76,9 @@ void Session::Run(const std::stop_token &token)
             break;
         case REGULAR_SIGNATURE:
             HandleRegularSignal();
+            break;
+        case TEST_SIGNATURE:
+            HandleTestSignal();
             break;
         default:
             HandleInvalidSignal();

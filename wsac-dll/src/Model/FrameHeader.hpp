@@ -22,7 +22,7 @@ struct FrameHeader
     FrameHeader() = delete;
     FrameHeader(FrameSig sig, uint64_t size);
 
-    bool Validate() const;
+    [[nodiscard]] bool Validate() const;
     void Sign();
 
     static FrameHeader Null();

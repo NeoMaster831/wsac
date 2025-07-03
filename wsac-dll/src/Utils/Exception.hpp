@@ -17,7 +17,7 @@
         std::string _msg;                                                                                              \
                                                                                                                        \
       public:                                                                                                          \
-        explicit name(const std::string &msg) : _msg(msg)                                                              \
+        explicit name(const std::string &msg) : _msg(std::move(msg))                                                   \
         {                                                                                                              \
         }                                                                                                              \
         const char *what() const noexcept override                                                                     \
