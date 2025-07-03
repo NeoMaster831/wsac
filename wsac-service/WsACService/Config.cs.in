@@ -14,5 +14,5 @@ public static class Config {
         new byte[] @PSK_LAYER2@,
     };
 
-    public static byte[] Preamble = @PREAMBLE@;
+    public static Preamble Preamble = new(new byte[] @PREAMBLE@);
 }

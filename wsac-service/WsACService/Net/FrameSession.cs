@@ -54,11 +54,11 @@ public class FrameSession(ILogger logger, SessionState state, IWriter writer, IR
 
     private async Task RunAsyncInternal(CancellationToken ct)
     {
-        var preamble = new byte[Config.Preamble.Length];
-
+        var preamble = new Preamble();
+        
         while (!ct.IsCancellationRequested)
         {
-            if (!ReceivePreamble(preamble, ct))
+            if (!ReceivePreamble(ref preamble, ct))
             {
                 // TODO : make event
                 logger.LogWarning("broken preamble");
@@ -103,16 +103,9 @@ public class FrameSession(ILogger logger, SessionState state, IWriter writer, IR
         return true;
     }
 
-    private bool ReceivePreamble(Span<byte> buffer, CancellationToken ct)
+    private bool ReceivePreamble(ref Preamble preamble, CancellationToken ct)
     {
-        // P[P0, P1, ... Pn-1, Pn] -> P[P1, P2, ... Pn, Pn]
-        for (var i = 0; i < buffer.Length - 1; ++i)
-            buffer[i] = buffer[i + 1];
-
-        // P[P0, P1, ... Pn-1, Pn] -> P[P1, P2, ... Pn, Pn+1]
-        buffer[^1] = reader.Read<byte>(ct);
-
-        // P == K?
-        return buffer.SequenceEqual(Config.Preamble);
+        preamble.Push(reader.Read<byte>(ct));
+        return preamble == Config.Preamble;
     }
 }
