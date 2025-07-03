@@ -7,7 +7,7 @@ namespace WsACService.Net.Models;
 [StructLayout(LayoutKind.Explicit, Pack = 1, Size = Size)]
 public struct Preamble : IEquatable<Preamble>
 {
-    private const int Size = 6;
+    public const int Size = 6;
 
     [FieldOffset(0)] public unsafe fixed byte  Data[Size];
     [FieldOffset(0)] private             int   High;
