@@ -11,8 +11,8 @@ public class CheckpointHandler : IFrameHandler
 
     public Task HandleAsync(FrameSession session, IReader body, CancellationToken ct)
     {
-        if (session.State.FrameSessionState is FrameSessionState.NONE)
-            session.State.FrameSessionState = FrameSessionState.READY;
+        if (session.State.FrameSessionState is FrameSessionState.None)
+            session.State.FrameSessionState = FrameSessionState.Ready;
         else
             session.SendCheckpoint();
 
