@@ -9,7 +9,7 @@ public class RegularHandler : IFrameHandler
 {
     public bool IsTarget(FrameSignature signature) => signature is FrameSignature.Regular;
 
-    public async Task HandleAsync(FrameSession session, ILowLevelReader body, CancellationToken ct)
+    public async Task HandleAsync(FrameSession session, IReader body, CancellationToken ct)
     {
         await new PacketSession(session.Logger, session.State, body).HandleAsync(body, ct);
     }

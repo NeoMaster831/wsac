@@ -7,5 +7,5 @@ public interface IFrameHandler
 {
     public bool IsTarget(FrameSignature signature);
 
-    public Task HandleAsync(FrameSession session, ILowLevelReader body, CancellationToken ct);
+    public Task HandleAsync(FrameSession session, IReader body, CancellationToken ct);
 }

@@ -4,7 +4,7 @@ using WsACService.Net.Models;
 
 namespace WsACService.Net;
 
-public class FrameSession(ILogger logger, SessionState state, ILowLevelWriter writer, ILowLevelReader reader)
+public class FrameSession(ILogger logger, SessionState state, IWriter writer, IReader reader)
 {
     public ILogger      Logger { get; } = logger;
     public SessionState State  { get; } = state;
@@ -25,7 +25,7 @@ public class FrameSession(ILogger logger, SessionState state, ILowLevelWriter wr
         }
     }
 
-    private async Task HandleFrameAsync(FrameHeader header, ILowLevelReader body, CancellationToken ct)
+    private async Task HandleFrameAsync(FrameHeader header, IReader body, CancellationToken ct)
     {
         var handler = FrameHandler.All.FirstOrDefault(handler => handler.IsTarget(header.Signature));
         if (handler is null)

@@ -31,8 +31,8 @@ public sealed class PipeSessionService : IHostedService, IDisposable
 
         using var pipe = new NamedPipeServerStream(Consts.PipeName, PipeDirection.InOut, Consts.NumThread);
 
-        var reader = new PipeLowLevelReader(pipe);
-        var writer = new PipeLowLevelWriter(pipe);
+        var reader = new PipeReader(pipe);
+        var writer = new PipeWriter(pipe);
 
         while (!ct.IsCancellationRequested)
         {
