@@ -56,7 +56,7 @@ public class FrameSession(ILogger logger, SessionState state, IWriter writer, IR
             return;
         }
 
-        if (State.FrameSessionState == FrameSessionState.None && handler is not CheckpointHandler)
+        if (State.FrameSessionState == FrameSessionState.None && handler is RegularHandler)
         {
             logger.LogWarning("regular data on NONE state; skipping...");
             await body.SkipAsync(header.DataSize, ct);
