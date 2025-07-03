@@ -21,7 +21,8 @@ public readonly struct PacketSession
         _writer = writer;
     }
 
-    public async ValueTask HandleAsync(IReader reader, CancellationToken ct)
+    public async ValueTask HandleAsync(CancellationToken ct)
     {
+        
     }
 }
